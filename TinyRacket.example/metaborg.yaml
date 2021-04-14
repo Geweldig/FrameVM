@@ -1,0 +1,8 @@
+---
+id: org.example:TinyRacket.example:0.1.0-SNAPSHOT
+name: TinyRacket
+dependencies:
+  compile:
+  - org.example:TinyRacket:0.1.0-SNAPSHOT
+build:
+  useBuildSystemSpec: true

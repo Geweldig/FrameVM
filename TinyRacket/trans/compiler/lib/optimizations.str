@@ -1,0 +1,25 @@
+module optimizations
+
+imports
+  signatures/TinyRacket-sig
+  libspoofax/stratego/debug
+
+rules
+  setup-optimizations: program -> ()
+    with
+      <table-create> OPTIMIZATIONS
+      ; <program-add(?CallCC(_)|OPT_CALLCC)> program
+      ; <program-add(?Raise(_)|OPT_RAISE)> program
+
+  program-add(check|struct): program -> ()
+    where
+      <sometd(check)> program
+      ; <table-put> (OPTIMIZATIONS, struct, 1)
+  program-add(check|struct) : program -> ()
+
+  program-has: element -> <table-get> (OPTIMIZATIONS, element)
+
+overlays
+  OPTIMIZATIONS = "optimizations"
+  OPT_CALLCC = "call-with-current-continuation"
+  OPT_RAISE = "raise"

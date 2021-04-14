@@ -1,0 +1,69 @@
+---
+id: org.example:Framed:0.1.0-SNAPSHOT
+name: Framed
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  - org.metaborg:statix.lang:${metaborgVersion}
+  - org.metaborg:dynsem:${metaborgVersion}
+  source:
+  - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+  - org.metaborg:statix.runtime:${metaborgVersion}
+
+exports:
+  - language: ATerm
+    directory: src-gen/syntax
+  - language: SDF
+    directory: src-gen/syntax
+    includes: "**/*.sdf"
+  - language: TemplateLang
+    directory: syntax
+    includes: "**/*.sdf3"
+  - language: Stratego-Sugar
+    directory: trans
+    includes: "**/*.str"
+  - language: Stratego-Sugar
+    directory: src-gen
+    includes: "**/*.str"
+    excludes: "statix/**/*.str"
+  - language: Stratego-Sugar
+    directory: src-gen/statix
+    includes: "**/*.str"
+  - language: EditorService
+    directory: src-gen
+    includes: "**/*.esv"
+  - language: EditorService
+    directory: editor
+    includes: "**/*.esv"
+
+pardonedLanguages:
+- EditorService
+- Stratego-Sugar
+- SDF
+debug:
+  typesmart: false
+language:
+  sdf:
+    pretty-print: Framed
+    sdf2table: java
+    jsglr-version: v2
+    placeholder:
+      prefix: "$"
+  stratego:
+    format: ctree
+    args:
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc

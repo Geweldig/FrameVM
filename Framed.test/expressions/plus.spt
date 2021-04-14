@@ -1,0 +1,27 @@
+module plus
+
+language Framed
+
+test number addition [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := 21 + 21;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test addition negative numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := -21 + -21;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "-42
+"

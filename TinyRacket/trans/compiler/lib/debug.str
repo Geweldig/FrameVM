@@ -1,0 +1,18 @@
+module debug
+
+imports
+  libspoofax/stratego/debug
+
+rules
+  //The error `Variable 'm' is not declared` can be ignored, as it's
+  //an implementation error in stratego.
+  deb(|m): s -> s
+    where
+      debug := <get-config> "debug"
+      ; <__deb(|m)> s
+  deb(|_) = id
+
+  __deb(|m) = logMessage(|m, "NOTE")
+  error(|m) = logMessage(|m, "ERROR")
+
+  logMessage(|m, level) = ppdebug(|<strcat> ($[{[level]} [m]], " "))

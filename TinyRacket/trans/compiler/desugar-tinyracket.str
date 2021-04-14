@@ -1,0 +1,66 @@
+module desugar-tinyracket
+
+imports
+  signatures/TinyRacket-sig
+  libspoofax/term/origin
+
+rules
+  desugar-all-trt: ast -> desugared
+    with
+      desugared := <bottomup(try(origin-track-forced(desugar-trt(|ast))))> ast
+
+  desugar-trt(|ast): Let(binds1, Let(binds2, body)) -> Let(<conc> (binds1, binds2), body)
+    where
+      <binds-distinct> (binds1, binds2)
+      ; <no-refs> (binds1, binds2)
+      ; not(<sometd(?CallCC(_))> binds2)
+  desugar-trt(|ast): LetRec(binds1, LetRec(binds2, body)) -> LetRec(<conc> (binds1, binds2), body)
+    where
+      <binds-distinct> (binds1, binds2)
+  desugar-trt(|ast): WithHandlers(_, e) -> e
+    where
+      not(<sometd(?Raise(_))> ast)
+
+rules
+  no-refs: (binds1, binds2) -> ()
+    where
+      disallowed_names := <map(get-name)> binds1
+      ; <map(get-body; no-ref(|disallowed_names))> binds2
+
+  no-ref(|disallowed_names): Var(n) -> ()
+    where
+      not(<elem> (n, disallowed_names))
+
+  no-ref(|disallowed_names): Assign(n, b) -> ()
+    where
+      not(<elem> (n, disallowed_names))
+      ; <no-ref(|disallowed_names)> b
+
+  no-ref(|disallowed_names): exp -> ()
+    where
+      not(<?Var(_)> exp + <?Assign(_, _)> exp)
+      ; new_disallowed_names := <get-disallowed-names(|disallowed_names)> exp
+      ; (_, items) := <explode-term> exp
+      ; <map(no-ref(|new_disallowed_names))> items
+  no-ref = id
+
+  get-disallowed-names(|disallowed_names): Let(binds, body) -> new_disallowed_names
+    with
+      allowed_names := <map(get-name)> binds
+      ; new_disallowed_names := <diff> (<uniq> disallowed_names, <uniq> allowed_names)
+  get-disallowed-names(|disallowed_names): LetRec(binds, body) -> new_disallowed_names
+    with
+      allowed_names := <map(get-name)> binds
+      ; new_disallowed_names := <diff> (<uniq> disallowed_names, <uniq> allowed_names)
+  get-disallowed-names(|disallowed_names): Lambda(n, e) -> new_disallowed_names
+    with
+      new_disallowed_names := <diff> (<uniq> disallowed_names, [n])
+  get-disallowed-names(|disallowed_names): _ -> disallowed_names
+
+
+  binds-distinct: (binds1, binds2) -> ()
+    where
+      <eq> (<isect> (<map(get-name)> binds1, <map(get-name)> binds2), [])
+
+  get-name: Bind(n, _) -> n
+  get-body: Bind(_, b) -> b

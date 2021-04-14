@@ -1,0 +1,3 @@
+(with-handlers
+ (((lambda (x) #t) (lambda (x) (+ x 3))))
+ (raise (with-handlers (((lambda (x) #t) (lambda (x) (+ x 32)))) (raise 7))))

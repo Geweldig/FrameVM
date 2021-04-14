@@ -1,0 +1,7135 @@
+module compiled
+
+language Framed
+
+test 42_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 42;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test and_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test and_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test and_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test and_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test and_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_1 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test and_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_1 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test and_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_and_false_0 self;
+      show 42;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test and_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_and_false_0 self;
+      show 42;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+1
+"
+
+test call-cc_01 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := 42;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_1 := self.callee_result;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test call-cc_02 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 1337,
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_1 := self.callee_result;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_2.parent,
+      ];
+      jump self.caller.intermediate_2.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_3 := self.callee_result;
+      show self.intermediate_3;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1337
+"
+
+test call-cc_03 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := 21;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_1 := self.callee_result;
+      self.intermediate_2 := 21 + self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test call-cc_04 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_1 := self.callee_result;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_2.parent,
+      ];
+      jump self.caller.intermediate_2.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := 21 + self.intermediate_3;
+      show self.intermediate_4;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test call-cc_05 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 3,
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_1 := self.callee_result;
+      self.intermediate_2 := 2 + self.intermediate_1;
+      self.caller.callee_result := self.intermediate_2;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_3.parent,
+      ];
+      jump self.caller.intermediate_3.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.intermediate_5 := 1 + self.intermediate_4;
+      show self.intermediate_5;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "4
+"
+
+test call-cc_06 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := 2 + 3;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 1 + self.intermediate_2;
+      show self.intermediate_3;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "6
+"
+
+test call-cc_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_k := 0,
+        var_i := 0,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := self.var_i;
+      self.intermediate_4 := self.intermediate_3 + 1;
+      self.var_i := self.intermediate_4;
+      self.intermediate_5 := self.var_i;
+      self.intermediate_6 := 3 < self.intermediate_5;
+      ifeq self.intermediate_6 ^.lbl_if_false_0 self;
+      self.intermediate_7 := self.var_i;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_8 := self.var_k;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := -1,
+        parent := self.intermediate_8.parent,
+      ];
+      jump self.caller.intermediate_8.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_9 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_9;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_10 := self.lbl_if_result_0;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x;
+      self.parent.var_k := self.intermediate_0;
+      self.caller.callee_result := self.parent.var_k;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "4
+"
+
+test call-cc_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        parent := self,
+        var_k := 0,
+        var_i := 0,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_4 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_4.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.var_i;
+      self.intermediate_7 := self.intermediate_6 + 1;
+      self.var_i := self.intermediate_7;
+      self.intermediate_8 := self.var_i;
+      self.intermediate_9 := 3 < self.intermediate_8;
+      ifeq self.intermediate_9 ^.lbl_if_false_0 self;
+      self.intermediate_10 := self.var_i;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_11 := self.exc_handler.handler.function,
+        arg1 := self.intermediate_10,
+      ];
+      jump self.intermediate_11 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_12 := self.var_k;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := -1,
+        parent := self.intermediate_12.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.intermediate_12.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_13 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_13;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_14 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.callee_result := self.intermediate_14;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_15 := self.callee_result;
+      show self.intermediate_15;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_kExc := self.arg1;
+      self.intermediate_1 := self.var_kExc;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_3 := self.var_x;
+      self.parent.var_k := self.intermediate_3;
+      self.caller.callee_result := self.parent.var_k;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "4
+"
+
+test call-cc_09 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        parent := self,
+        var_k := 0,
+        var_i := 0,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_4 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_4.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.var_i;
+      self.intermediate_7 := self.intermediate_6 + 1;
+      self.var_i := self.intermediate_7;
+      self.intermediate_8 := self.var_i;
+      self.intermediate_9 := 3 < self.intermediate_8;
+      ifeq self.intermediate_9 ^.lbl_if_false_0 self;
+      self.intermediate_10 := self.var_i;
+      self.lbl_if_result_0 := self.intermediate_10;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_11 := self.var_k;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_12 := self.exc_handler.handler.function,
+        arg1 := -1,
+      ];
+      jump self.intermediate_12 self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_13 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_13;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_14 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.callee_result := self.intermediate_14;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_15 := self.callee_result;
+      show self.intermediate_15;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_kExc := self.arg1;
+      self.intermediate_1 := self.var_kExc;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_3 := self.var_x;
+      self.parent.var_k := self.intermediate_3;
+      self.caller.callee_result := self.parent.var_k;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "-1
+"
+
+test call-cc_10 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 2 + self.intermediate_2;
+      self.parent.intermediate_4 := self.intermediate_3;
+      self := self.parent;
+      show self.intermediate_4;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self.parent.var_x := self.intermediate_0;
+      self.caller.callee_result := 3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test call-cc_11 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+        var_done := 0,
+        var_result := 0,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 2 + self.intermediate_2;
+      self.var_result := self.intermediate_3;
+      self.intermediate_4 := self.var_done;
+      self.intermediate_5 := !self.intermediate_4;
+      ifeq self.intermediate_5 ^.lbl_if_false_0 self;
+      self.var_done := 1;
+      self.intermediate_6 := self.var_x;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 4,
+        parent := self.intermediate_6.parent,
+      ];
+      jump self.caller.intermediate_6.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_7 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_8 := self.var_result;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_9 := self.lbl_if_result_0;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self.parent.var_x := self.intermediate_0;
+      self.caller.callee_result := 3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "6
+"
+
+test call-cc_12 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+        var_done := 0,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 2 + self.intermediate_2;
+      self := frame: [
+        parent := self,
+        var_result := self.intermediate_3,
+      ];
+      self.intermediate_4 := self.parent.var_done;
+      self.intermediate_5 := !self.intermediate_4;
+      ifeq self.intermediate_5 ^.lbl_if_false_0 self;
+      self.parent.var_done := 1;
+      self.intermediate_6 := self.parent.var_x;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 4,
+        parent := self.intermediate_6.parent,
+      ];
+      jump self.caller.intermediate_6.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_7 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_8 := self.var_result;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_9 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self.parent.var_x := self.intermediate_0;
+      self.caller.callee_result := 3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "6
+"
+
+test call-cc_13 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+        var_done := 0,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 2 + self.intermediate_2;
+      self := frame: [
+        parent := self,
+        var_result := self.intermediate_3,
+      ];
+      self.intermediate_4 := self.parent.var_done;
+      self.intermediate_5 := !self.intermediate_4;
+      ifeq self.intermediate_5 ^.lbl_if_false_0 self;
+      self.intermediate_6 := self.var_result;
+      self.lbl_if_result_0 := self.intermediate_6;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_7 := self.var_result;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_8 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self.parent.var_x := self.intermediate_0;
+      self.caller.callee_result := 3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test call-cc_14 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 5,
+      ];
+      self.intermediate_0 := self.var_x;
+      self := frame: [
+        parent := self,
+        var_count := self.intermediate_0,
+        var_fac := 0,
+      ];
+      self.intermediate_1 := self.parent.var_x;
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_3.parent,
+      ];
+      jump self.caller.intermediate_3.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.intermediate_5 := self.intermediate_1 * self.intermediate_4;
+      self.parent.var_x := self.intermediate_5;
+      self.intermediate_6 := self.var_count;
+      self.intermediate_7 := self.intermediate_6 == 1;
+      ifeq self.intermediate_7 ^.lbl_if_false_0 self;
+      self.intermediate_8 := self.parent.var_x;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_9 := self.var_count;
+      self.intermediate_10 := self.intermediate_9 + -1;
+      self.var_count := self.intermediate_10;
+      self.intermediate_11 := self.var_fac;
+      self.intermediate_12 := self.var_count;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_12,
+        parent := self.intermediate_11.parent,
+      ];
+      jump self.caller.intermediate_11.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_13 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_13;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_14 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_15 := self.intermediate_14;
+      self := self.parent;
+      show self.intermediate_15;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_2 := self.var_k;
+      self.parent.var_fac := self.intermediate_2;
+      self.caller.callee_result := 1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test call-cc_15 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 5,
+      ];
+      self.intermediate_0 := self.var_x;
+      self := frame: [
+        parent := self,
+        var_count := self.intermediate_0,
+        var_fac := 0,
+      ];
+      self.intermediate_1 := self.parent.var_x;
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_3.parent,
+      ];
+      jump self.caller.intermediate_3.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.intermediate_5 := self.intermediate_1 * self.intermediate_4;
+      self.parent.var_x := self.intermediate_5;
+      self.intermediate_6 := self.var_count;
+      self.intermediate_7 := self.intermediate_6 == 1;
+      ifeq self.intermediate_7 ^.lbl_if_false_0 self;
+      self.intermediate_8 := self.parent.var_x;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_9 := self.var_count;
+      self.intermediate_10 := self.intermediate_9 + -1;
+      self.var_count := self.intermediate_10;
+      self.intermediate_11 := self.parent.var_x;
+      show self.intermediate_11;
+      self.intermediate_12 := self.var_fac;
+      self.intermediate_13 := self.var_count;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_13,
+        parent := self.intermediate_12.parent,
+      ];
+      jump self.caller.intermediate_12.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_14 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_14;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_15 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_16 := self.intermediate_15;
+      self := self.parent;
+      show self.intermediate_16;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_2 := self.var_k;
+      self.parent.var_fac := self.intermediate_2;
+      self.caller.callee_result := 1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+20
+15
+10
+5
+"
+
+test call-cc_16 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 5,
+      ];
+      self.intermediate_0 := self.var_x;
+      self := frame: [
+        parent := self,
+        var_count := self.intermediate_0,
+        var_fac := 0,
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_2.parent,
+      ];
+      jump self.caller.intermediate_2.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.var_x;
+      self.intermediate_5 := self.intermediate_3 * self.intermediate_4;
+      self.parent.var_x := self.intermediate_5;
+      self.intermediate_6 := self.var_count;
+      self.intermediate_7 := self.intermediate_6 == 1;
+      ifeq self.intermediate_7 ^.lbl_if_false_0 self;
+      self.intermediate_8 := self.parent.var_x;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_9 := self.var_count;
+      self.intermediate_10 := self.intermediate_9 + -1;
+      self.var_count := self.intermediate_10;
+      self.intermediate_11 := self.var_fac;
+      self.intermediate_12 := self.var_count;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_12,
+        parent := self.intermediate_11.parent,
+      ];
+      jump self.caller.intermediate_11.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_13 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_13;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_14 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_15 := self.intermediate_14;
+      self := self.parent;
+      show self.intermediate_15;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_1 := self.var_k;
+      self.parent.var_fac := self.intermediate_1;
+      self.caller.callee_result := 1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "120
+"
+
+test call-cc_17 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fac := 0,
+        var_x := 5,
+      ];
+      self.intermediate_0 := self.var_x;
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_count := self.intermediate_0,
+        var_callcc_lambda := self.intermediate_2,
+      ];
+      self.intermediate_3 := self.parent.var_x;
+      self.intermediate_4 := self.var_callcc_lambda;
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_4.parent,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 * self.intermediate_5;
+      self.parent.var_x := self.intermediate_6;
+      self.intermediate_7 := self.var_count;
+      self.intermediate_8 := self.intermediate_7 == 1;
+      ifeq self.intermediate_8 ^.lbl_if_false_0 self;
+      self.intermediate_9 := self.parent.var_x;
+      self.lbl_if_result_0 := self.intermediate_9;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_10 := self.var_count;
+      self.intermediate_11 := self.intermediate_10 + -1;
+      self.var_count := self.intermediate_11;
+      self.intermediate_12 := self.parent.var_fac;
+      self.intermediate_13 := self.var_count;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_13,
+        parent := self.intermediate_12.parent,
+      ];
+      jump self.caller.intermediate_12.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_14 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_14;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_15 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_16 := self.intermediate_15;
+      self := self.parent;
+      show self.intermediate_16;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_1 := self.var_k;
+      self.parent.var_fac := self.intermediate_1;
+      self.caller.callee_result := 1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test call-cc_18 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        parent := self,
+        var_k := 0,
+        var_i := 0,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_4 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_4.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.var_i;
+      self.intermediate_7 := self.intermediate_6 + 1;
+      self.var_i := self.intermediate_7;
+      self.intermediate_8 := self.var_i;
+      self.intermediate_9 := 3 < self.intermediate_8;
+      ifeq self.intermediate_9 ^.lbl_if_false_0 self;
+      show 42;
+      show 1337;
+      self.intermediate_10 := self.var_i;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_11 := self.exc_handler.handler.function,
+        arg1 := self.intermediate_10,
+      ];
+      jump self.intermediate_11 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_12 := self.var_k;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := -1,
+        parent := self.intermediate_12.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.intermediate_12.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_13 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_13;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_14 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.callee_result := self.intermediate_14;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_15 := self.callee_result;
+      show self.intermediate_15;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_kExc := self.arg1;
+      self.intermediate_1 := self.var_kExc;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_3 := self.var_x;
+      self.parent.var_k := self.intermediate_3;
+      self.caller.callee_result := self.parent.var_k;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+1337
+4
+"
+
+test call-cc_19 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fac := 0,
+        var_x := 5,
+      ];
+      self.intermediate_0 := self.var_x;
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_count := self.intermediate_0,
+        var_callcc_lambda := self.intermediate_2,
+      ];
+      self.intermediate_3 := self.parent.var_x;
+      self.intermediate_4 := self.var_callcc_lambda;
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_4.parent,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 * self.intermediate_5;
+      self.parent.var_x := self.intermediate_6;
+      self.intermediate_7 := self.var_count;
+      self.intermediate_8 := self.intermediate_7 == 1;
+      ifeq self.intermediate_8 ^.lbl_if_false_0 self;
+      self.intermediate_9 := self.parent.var_x;
+      self.lbl_if_result_0 := self.intermediate_9;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_10 := self.var_count;
+      self.intermediate_11 := self.intermediate_10 + -1;
+      self.var_count := self.intermediate_11;
+      self.intermediate_12 := self.parent.var_fac;
+      self.intermediate_13 := self.var_count;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_13,
+        parent := self.intermediate_12.parent,
+      ];
+      jump self.caller.intermediate_12.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_14 := self.callee_result;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_14,
+        parent := self.var_count.parent,
+      ];
+      jump self.caller.var_count.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_15 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_15;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_16 := self.lbl_if_result_0;
+      self := self.parent;
+      self.parent.intermediate_17 := self.intermediate_16;
+      self := self.parent;
+      show self.intermediate_17;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_1 := self.var_k;
+      self.parent.var_fac := self.intermediate_1;
+      self.caller.callee_result := 1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test call-cc_20 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.var_x := 0;
+      self.var_done := 0;
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_continue_0,
+        caller := self,
+        arg1 := frame: [
+          function := ^.lbl_call_cc_0,
+          parent := self,
+        ],
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_call_cc_0 := code {
+      self.parent.callee_result := self.arg1;
+      self := self.parent;
+      jump ^.lbl_continue_0 self;
+    },
+    lbl_continue_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.intermediate_3 := 2 + self.intermediate_2;
+      self.var_result := self.intermediate_3;
+      self.intermediate_4 := self.var_done;
+      self.intermediate_5 := !self.intermediate_4;
+      ifeq self.intermediate_5 ^.lbl_if_false_0 self;
+      self.var_done := 1;
+      self.intermediate_6 := self.var_x;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 4,
+        parent := self.intermediate_6.parent,
+      ];
+      jump self.caller.intermediate_6.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_7 := self.callee_result;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_8 := self.var_result;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.parent.intermediate_9 := self.lbl_if_result_0;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_k := self.arg1;
+      self.intermediate_0 := self.var_k;
+      self.parent.var_x := self.intermediate_0;
+      self.caller.callee_result := 3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "6
+"
+
+test eq_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 == 42;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test eq_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 2 * 21;
+      self.intermediate_1 := 42 == self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test eq_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 == 1337;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test eq_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self.intermediate_1 := 1 == self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test false_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test gt_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 1337 < 42;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test gt_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test gt_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 42;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test gt_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 2 * 21;
+      self.intermediate_1 := 41 < self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test handlers_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_1 := self.exc_handler.handler.function,
+        arg1 := 42,
+      ];
+      jump self.intermediate_1 self;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "uncaught exception: 42
+"
+
+test handlers_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_1 := self.exc_handler.handler.function,
+        arg1 := 42,
+      ];
+      jump self.intermediate_1 self;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "uncaught exception: 42
+"
+
+test handlers_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_1,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_2 := self.exc_handler.handler.function,
+        arg1 := 42,
+      ];
+      jump self.intermediate_2 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_3 := self.callee_result;
+      show self.intermediate_3;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_handler := self.intermediate_1,
+        exc_handler := self.exc_handler,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.var_handler,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_2 := self.exc_handler.handler.function,
+        arg1 := 42,
+      ];
+      jump self.intermediate_2 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.parent.intermediate_4 := self.intermediate_3;
+      self := self.parent;
+      show self.intermediate_4;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self.intermediate_4 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_1,
+          caller := self,
+          handler := self.intermediate_4,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_5 := self.exc_handler.handler.function,
+        arg1 := 7,
+      ];
+      jump self.intermediate_5 self;
+    },
+    lbl_with_handlers_done_1 := code {
+      self.intermediate_6 := self.callee_result;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_7 := self.exc_handler.handler.function,
+        arg1 := self.intermediate_6,
+      ];
+      jump self.intermediate_7 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_8 := self.callee_result;
+      show self.intermediate_8;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := self.var_x + 3;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_3 := self.var_x + 32;
+      self.caller.callee_result := self.intermediate_3;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        parent := self,
+        var_catchesException := 0,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_catchesException := self.intermediate_2;
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.var_catchesException,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 21,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.intermediate_5 := self.intermediate_4;
+      self := self.parent;
+      show self.intermediate_5;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_catchesException := self.intermediate_2,
+        exc_handler := self.exc_handler,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.var_catchesException,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 21,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.intermediate_5 := self.intermediate_4;
+      self := self.parent;
+      show self.intermediate_5;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_catchesException := self.intermediate_2;
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.var_catchesException,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 21,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.intermediate_5 := self.intermediate_4;
+      self := self.parent;
+      show self.intermediate_5;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_09 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        parent := self,
+        var_raisesException := 0,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_raisesException := self.intermediate_2;
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_3,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 42,
+        parent := self.parent.var_raisesException.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.parent.var_raisesException.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.callee_result := self.intermediate_4;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.parent.intermediate_6 := self.intermediate_5;
+      self := self.parent;
+      show self.intermediate_6;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_1 := self.exc_handler.handler.function,
+        arg1 := self.var_x,
+      ];
+      jump self.intermediate_1 self;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_10 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_raisesException := self.intermediate_2,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_3,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 42,
+        parent := self.parent.var_raisesException.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.parent.var_raisesException.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.callee_result := self.intermediate_4;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.parent.intermediate_6 := self.intermediate_5;
+      self := self.parent;
+      show self.intermediate_6;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_1 := self.exc_handler.handler.function,
+        arg1 := self.var_x,
+      ];
+      jump self.intermediate_1 self;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_11 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_raisesException := self.intermediate_2;
+      self.intermediate_3 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_3,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 42,
+        parent := self.parent.var_raisesException.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.parent.var_raisesException.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.parent.callee_result := self.intermediate_4;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.parent.intermediate_6 := self.intermediate_5;
+      self := self.parent;
+      show self.intermediate_6;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_1 := self.exc_handler.handler.function,
+        arg1 := self.var_x,
+      ];
+      jump self.intermediate_1 self;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_12 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 21,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_5 := self.callee_result;
+      show self.intermediate_5;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := 2 * self.var_x;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_13 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_1,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := self.exc_handler,
+      ];
+      self.intermediate_9 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_9;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 6,
+        parent := self.var_fibonacci.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_10 := self.callee_result;
+      self.parent.intermediate_11 := self.intermediate_10;
+      self := self.parent;
+      self.parent.callee_result := self.intermediate_11;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_12 := self.callee_result;
+      show self.intermediate_12;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_2 := self.var_x < 0;
+      ifeq self.intermediate_2 ^.lbl_if_false_0 self;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 42,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_4 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_6,
+        parent := self.parent.var_fibonacci.parent,
+        exc_handler := self.exc_handler,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_7 := self.callee_result;
+      self.intermediate_8 := self.intermediate_5 + self.intermediate_7;
+      self.lbl_if_result_0 := self.intermediate_8;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_14 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 10 + 32;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_15 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_1,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_2 := self.exc_handler.handler.function,
+        arg1 := 1337,
+      ];
+      jump self.intermediate_2 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.intermediate_3 + 32;
+      show self.intermediate_4;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := 10;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_16 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_2 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_2,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 5,
+      ];
+      jump self.intermediate_3 self;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_4 := self.callee_result;
+      self.intermediate_5 := self.intermediate_4 + 32;
+      show self.intermediate_5;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_1 := 2 * self.var_x;
+      self.caller.callee_result := self.intermediate_1;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test handlers_17 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.exc_handler := frame: [
+        handler := frame: [
+          function := ^.^.lbl_invalid_exception_0.start,
+          parent := "INVALID",
+        ],
+        caller := "INVALID",
+        return := "INVALID",
+        call_exc_frame := "INVALID",
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        exc_handler := frame: [
+          return := ^.lbl_with_handlers_done_0,
+          caller := self,
+          handler := self.intermediate_1,
+          call_exc_frame := self.exc_handler,
+        ],
+      ];
+      self.parent.callee_result := 10;
+      jump ^.lbl_with_handlers_done_0 self.parent;
+    },
+    lbl_with_handlers_done_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self := frame: [
+        return := self.exc_handler.return,
+        parent := self.exc_handler.handler.parent,
+        caller := self.exc_handler.caller,
+        exc_handler := self.exc_handler.call_exc_frame,
+        intermediate_3 := self.exc_handler.handler.function,
+        arg1 := 32,
+      ];
+      jump self.intermediate_3 self;
+    },
+  ],
+  lbl_invalid_exception_0 := frame: [
+    start := code {
+      self.intermediate_0 := "uncaught exception: " # self.arg1;
+      show self.intermediate_0;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := 1337;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "uncaught exception: 32
+"
+
+test if_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 42;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.lbl_if_result_0 := 1337;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      show self.lbl_if_result_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test if_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.intermediate_1 := 5 + 2;
+      self := frame: [
+        parent := self,
+        var_a := self.intermediate_1,
+      ];
+      self.intermediate_2 := self.var_a * 3;
+      self.var_a := self.intermediate_2;
+      self.intermediate_3 := self.var_a * 2;
+      self.var_a := self.intermediate_3;
+      self.parent.intermediate_4 := self.var_a;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_4;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_5 := 30 + 7;
+      self := frame: [
+        parent := self,
+        var_b := self.intermediate_5,
+      ];
+      self.intermediate_6 := 1300 + self.var_b;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      show self.lbl_if_result_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test if_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.intermediate_1 := 5 + 2;
+      self := frame: [
+        parent := self,
+        var_a := self.intermediate_1,
+      ];
+      self.intermediate_2 := self.var_a * 3;
+      self.var_a := self.intermediate_2;
+      self.intermediate_3 := self.var_a * 2;
+      self.var_a := self.intermediate_3;
+      self.parent.intermediate_4 := self.var_a;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_4;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_5 := 30 + 7;
+      self := frame: [
+        parent := self,
+        var_b := self.intermediate_5,
+      ];
+      self.intermediate_6 := 1300 + self.var_b;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      show self.lbl_if_result_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1337
+"
+
+test if_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.intermediate_1 := 30 + 7;
+      self := frame: [
+        parent := self,
+        var_b := self.intermediate_1,
+      ];
+      self.intermediate_2 := 1300 + self.var_b;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_3;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_4 := 5 + 2;
+      self := frame: [
+        parent := self,
+        var_a := self.intermediate_4,
+      ];
+      self.intermediate_5 := self.var_a * 3;
+      self.var_a := self.intermediate_5;
+      self.intermediate_6 := self.var_a * 2;
+      self.var_a := self.intermediate_6;
+      self.parent.intermediate_7 := self.var_a;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      show self.lbl_if_result_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1337
+"
+
+test if_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.intermediate_1 := 30 + 7;
+      self := frame: [
+        parent := self,
+        var_b := self.intermediate_1,
+      ];
+      self.intermediate_2 := 1300 + self.var_b;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_3;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_4 := 5 + 2;
+      self := frame: [
+        parent := self,
+        var_a := self.intermediate_4,
+      ];
+      self.intermediate_5 := self.var_a * 3;
+      self.var_a := self.intermediate_5;
+      self.intermediate_6 := self.var_a * 2;
+      self.var_a := self.intermediate_6;
+      self.parent.intermediate_7 := self.var_a;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_7;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      show self.lbl_if_result_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_01 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_twenty_one := 21,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 2,
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      show self.intermediate_3;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_two := self.arg1;
+      self.intermediate_0 := self.var_two * self.parent.var_twenty_one;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_twenty_one := 21,
+      ];
+      self.intermediate_4 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := 1337,
+        parent := self.intermediate_4.parent,
+      ];
+      jump self.caller.intermediate_4.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.parent.intermediate_6 := self.intermediate_5;
+      self := self.parent;
+      show self.intermediate_6;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_ignored := self.arg1;
+      self := frame: [
+        parent := self,
+        var_two := 2,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 1337,
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.caller.callee_result := self.intermediate_3;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_ignored := self.arg1;
+      self.intermediate_0 := self.parent.var_two * self.parent.parent.parent.var_twenty_one;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_04 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.caller.callee_result := self.var_x;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 0,
+        parent := self.intermediate_0.parent,
+      ];
+      jump self.caller.intermediate_0.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_1 := self.callee_result;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test lambda_05 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x * self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "441
+"
+
+test lambda_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := -1,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test lambda_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 0,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test lambda_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 1,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test lambda_09 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 2,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test lambda_10 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 3,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "2
+"
+
+test lambda_11 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 4,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "3
+"
+
+test lambda_12 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_13 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 6,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "8
+"
+
+test lambda_14 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 6,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "8
+"
+
+test lambda_15 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.intermediate_8 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_8;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_9 := self.callee_result;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self := frame: [
+        parent := self,
+        var_irrelevant := 0,
+        var_also_irrelevant := 0,
+      ];
+      self.intermediate_2 := self.parent.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_1 := self.intermediate_7;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_16 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 7,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "13
+"
+
+test lambda_17 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 8,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "21
+"
+
+test lambda_18 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 9,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "34
+"
+
+test lambda_19 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_20 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+        var_irrelevant := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_21 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+        var_irrelevant := 0,
+        var_also_irrelevant := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_22 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+        var_irrelevant := 0,
+        var_also_irrelevant := 0,
+      ];
+      self.intermediate_8 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_8;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_9 := self.callee_result;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self := frame: [
+        parent := self,
+        var_something := 0,
+      ];
+      self.intermediate_2 := self.parent.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_1 := self.intermediate_7;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_23 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_8 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_8;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_9 := self.callee_result;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self := frame: [
+        parent := self,
+        var_irrelevant := 0,
+      ];
+      self.intermediate_2 := self.parent.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_1 := self.intermediate_7;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_24 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_8 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_8;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 10,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_9 := self.callee_result;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self := frame: [
+        parent := self,
+        var_irrelevant := 0,
+        var_also_irrelevant := 0,
+      ];
+      self.intermediate_2 := self.parent.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.parent.intermediate_7 := self.intermediate_6;
+      self := self.parent;
+      self.lbl_if_result_1 := self.intermediate_7;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "55
+"
+
+test lambda_25 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.intermediate_1.parent,
+      ];
+      jump self.caller.intermediate_1.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_2,
+      ];
+      self.parent.intermediate_3 := self.var_x;
+      self := self.parent;
+      show self.intermediate_3;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_26 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_1,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.var_x.parent,
+      ];
+      jump self.caller.var_x.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      show self.intermediate_3;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_27 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_1,
+      ];
+      self := frame: [
+        parent := self,
+        var_a := self.var_x,
+        var_b := 0,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.parent.var_x.parent,
+      ];
+      jump self.caller.parent.var_x.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.parent.intermediate_4 := self.intermediate_3;
+      self := self.parent;
+      show self.intermediate_4;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_28 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_1,
+      ];
+      self := frame: [
+        parent := self,
+        var_a := self.var_x,
+        var_b := 0,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 21,
+        parent := self.var_a.parent,
+      ];
+      jump self.caller.var_a.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.parent.intermediate_4 := self.intermediate_3;
+      self := self.parent;
+      show self.intermediate_4;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_29 [[
+frame: [
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x + self.var_x;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+  Main := frame: [
+    start := code {
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_1,
+      ];
+      self := frame: [
+        parent := self,
+        var_b := 21,
+        var_a := self.var_x,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.var_b,
+        parent := self.var_a.parent,
+      ];
+      jump self.caller.var_a.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_2 := self.callee_result;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self.parent.intermediate_4 := self.intermediate_3;
+      self := self.parent;
+      show self.intermediate_4;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test lambda_30 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        parent := self,
+        var_fib_mirror := self.var_fibonacci,
+      ];
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_31 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        parent := self,
+        var_x := 5,
+      ];
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := self.var_x,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_32 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        parent := self,
+        var_fib_mirror := self.var_fibonacci,
+      ];
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.var_fib_mirror.parent,
+      ];
+      jump self.caller.var_fib_mirror.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      show self.intermediate_10;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_33 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self.intermediate_9 := frame: [
+        function := ^.^.lbl_lambda_1.start,
+        parent := self,
+      ];
+      self := frame: [
+        return := ^.lbl_return_3,
+        caller := self,
+        arg1 := self.var_fibonacci,
+        parent := self.intermediate_9.parent,
+      ];
+      jump self.caller.intermediate_9.function self;
+    },
+    lbl_return_3 := code {
+      self.intermediate_10 := self.callee_result;
+      self.parent.intermediate_11 := self.intermediate_10;
+      self := self.parent;
+      show self.intermediate_11;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+  ],
+  lbl_lambda_1 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.var_x.parent,
+      ];
+      jump self.caller.var_x.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.caller.callee_result := self.intermediate_8;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_34 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_15 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_15;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+    lbl_return_2 := code {
+      self.intermediate_16 := self.callee_result;
+      self.parent.intermediate_17 := self.intermediate_16;
+      self := self.parent;
+      show self.intermediate_17;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      self := frame: [
+        parent := self,
+        var_check_1 := self.intermediate_0,
+      ];
+      ifeq self.var_check_1 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.parent.var_x < 2;
+      self := frame: [
+        parent := self,
+        var_check_2 := self.intermediate_1,
+      ];
+      ifeq self.var_check_2 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.parent.parent.var_x + -1;
+      self := frame: [
+        parent := self,
+        var_call_1 := self.intermediate_2,
+      ];
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.var_call_1,
+        parent := self.parent.parent.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.parent.parent.parent.var_x + -2;
+      self := frame: [
+        parent := self,
+        var_call_1_result := self.intermediate_3,
+        var_call_2 := self.intermediate_4,
+      ];
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.var_call_2,
+        parent := self.parent.parent.parent.parent.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.parent.parent.parent.parent.var_fibonacci.function self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self := frame: [
+        parent := self,
+        var_call_2_result := self.intermediate_5,
+      ];
+      self.intermediate_6 := self.parent.var_call_1_result + self.var_call_2_result;
+      self := frame: [
+        parent := self,
+        var_plus_result := self.intermediate_6,
+      ];
+      self.parent.intermediate_7 := self.var_plus_result;
+      self := self.parent;
+      self.parent.intermediate_8 := self.intermediate_7;
+      self := self.parent;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      self.parent.intermediate_10 := self.intermediate_9;
+      self := self.parent;
+      self.lbl_if_result_1 := self.intermediate_10;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_if_done_1 := code {
+      self.parent.intermediate_11 := self.lbl_if_result_1;
+      self := self.parent;
+      self := frame: [
+        parent := self,
+        var_result_2 := self.intermediate_11,
+      ];
+      self.parent.intermediate_12 := self.var_result_2;
+      self := self.parent;
+      self.lbl_if_result_0 := self.intermediate_12;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_if_done_0 := code {
+      self := frame: [
+        parent := self,
+        var_result_1 := self.lbl_if_result_0,
+      ];
+      self.parent.intermediate_13 := self.var_result_1;
+      self := self.parent;
+      self.parent.intermediate_14 := self.intermediate_13;
+      self := self.parent;
+      self.caller.callee_result := self.intermediate_14;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "5
+"
+
+test lambda_35 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 1,
+      ];
+      self.intermediate_1 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self := frame: [
+        parent := self,
+        var_f := self.intermediate_1,
+      ];
+      self.parent.intermediate_2 := self.var_f;
+      self := self.parent;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := 2,
+        parent := self.intermediate_3.parent,
+      ];
+      jump self.caller.intermediate_3.function self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_4 := self.callee_result;
+      show self.intermediate_4;
+    },
+  ],
+  lbl_lambda_0 := frame: [
+    start := code {
+      self.var_y := self.arg1;
+      self.intermediate_0 := self.parent.var_x + self.var_y;
+      self.caller.callee_result := self.intermediate_0;
+      jump self.return self.caller;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "3
+"
+
+test let_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+      ];
+      self.parent.intermediate_0 := 1;
+      self := self.parent;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test let_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 0,
+      ];
+      self.parent.intermediate_0 := self.var_x;
+      self := self.parent;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test let_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+      ];
+      self.parent.intermediate_1 := self.var_x;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test let_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+        var_y := 0,
+      ];
+      self.parent.intermediate_1 := self.var_y;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test let_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+        var_y := 0,
+      ];
+      ifeq self.var_x ^.lbl_and_false_0 self;
+      ifeq self.var_y ^.lbl_and_false_0 self;
+      self.intermediate_1 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.parent.intermediate_2 := self.intermediate_1;
+      self := self.parent;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test let_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+        var_y := 0,
+      ];
+      ifeq self.var_x ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq self.var_y ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_1 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.parent.intermediate_2 := self.intermediate_1;
+      self := self.parent;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test let_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 1337,
+      ];
+      self.var_x := 42;
+      self.parent.intermediate_0 := self.var_x;
+      self := self.parent;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test let_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 42,
+      ];
+      self := frame: [
+        parent := self,
+        var_x := 1337,
+      ];
+      self.var_x := 314;
+      self.parent.intermediate_0 := self.var_x;
+      self := self.parent;
+      self.parent.intermediate_1 := self.var_x;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test let_09 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 42,
+      ];
+      self := frame: [
+        parent := self,
+        var_unimportant := 1337,
+      ];
+      self.parent.var_x := 314;
+      self.parent.intermediate_0 := self.parent.var_x;
+      self := self.parent;
+      self.parent.intermediate_1 := self.var_x;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "314
+"
+
+test let_10 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 21,
+        var_y := 2,
+      ];
+      self.intermediate_0 := self.var_x * self.var_y;
+      self.parent.intermediate_1 := self.intermediate_0;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test let_11 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+        var_x := 10,
+        var_y := 2,
+        var_z := 30,
+      ];
+      self.intermediate_0 := self.var_y + self.var_z;
+      self.intermediate_1 := self.var_x + self.intermediate_0;
+      self.parent.intermediate_2 := self.intermediate_1;
+      self := self.parent;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test let_12 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 3 * 7;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+        var_y := 2,
+      ];
+      self.intermediate_1 := self.var_x * self.var_y;
+      self.parent.intermediate_2 := self.intermediate_1;
+      self := self.parent;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test let_13 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 3 * 7;
+      self.intermediate_1 := 7 * 3;
+      self := frame: [
+        parent := self,
+        var_x := self.intermediate_0,
+        var_y := self.intermediate_1,
+      ];
+      self.intermediate_2 := self.var_x + self.var_y;
+      self.parent.intermediate_3 := self.intermediate_2;
+      self := self.parent;
+      show self.intermediate_3;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test letrec_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.var_x := 1;
+      self.var_y := 1;
+      self.intermediate_0 := self.var_x + self.var_y;
+      self.parent.intermediate_1 := self.intermediate_0;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "2
+"
+
+test letrec_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.var_x := 1;
+      self.var_y := self.var_x;
+      self.intermediate_0 := self.var_x + self.var_y;
+      self.parent.intermediate_1 := self.intermediate_0;
+      self := self.parent;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "2
+"
+
+test letrec_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self := frame: [
+        parent := self,
+      ];
+      self.intermediate_0 := 3 * 7;
+      self.var_x := self.intermediate_0;
+      self.var_y := self.var_x;
+      self.intermediate_1 := self.var_x + self.var_y;
+      self.parent.intermediate_2 := self.intermediate_1;
+      self := self.parent;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test mul_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 21 * 2;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test mul_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 7 * 3;
+      self.intermediate_1 := self.intermediate_0 * 2;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test not_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := !1;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := !0;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 1337 < 42;
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 42;
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 2 * 21;
+      self.intermediate_1 := 41 < self.intermediate_0;
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 == 42;
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 2 * 21;
+      self.intermediate_1 := 42 == self.intermediate_0;
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_09 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 == 1337;
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_10 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      self.intermediate_1 := 1 == self.intermediate_0;
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_11 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_12 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_13 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_14 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_0 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_15 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_and_false_0 self;
+      ifeq 1 ^.lbl_and_false_0 self;
+      self.intermediate_1 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_16 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_and_false_0 self;
+      ifeq 0 ^.lbl_and_false_0 self;
+      self.intermediate_1 := 1;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_and_done_0 self;
+    },
+    lbl_and_done_0 := code {
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_17 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_18 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_19 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_20 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_1 := !self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test not_21 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_1 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test not_22 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_1 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      self.intermediate_2 := !self.intermediate_1;
+      show self.intermediate_2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test or_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test or_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test or_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test or_04 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "0
+"
+
+test or_05 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_1 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test or_06 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 42 < 1337;
+      ifeq self.intermediate_0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      ifeq 0 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_1 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_1 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test or_07 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 0 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      show 42;
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+1
+"
+
+test or_08 [[
+frame: [
+  Main := frame: [
+    start := code {
+      ifeq 1 ^.lbl_or_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_false_0 := code {
+      show 42;
+      ifeq 1 ^.lbl_or_both_false_0 self;
+      jump ^.lbl_or_true_0 self;
+    },
+    lbl_or_both_false_0 := code {
+      self.intermediate_0 := 0;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_true_0 := code {
+      self.intermediate_0 := 1;
+      jump ^.lbl_or_done_0 self;
+    },
+    lbl_or_done_0 := code {
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test plus_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 20 + 22;
+      show self.intermediate_0;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test plus_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      self.intermediate_0 := 3 + 19;
+      self.intermediate_1 := 20 + self.intermediate_0;
+      show self.intermediate_1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "42
+"
+
+test seq_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 2;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "2
+"
+
+test true_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test writeln_01 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+"
+
+test writeln_02 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 1;
+      show "#<void>";
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+#<void>
+"
+
+test writeln_03 [[
+frame: [
+  Main := frame: [
+    start := code {
+      show 1;
+      show 1;
+    },
+  ],
+]
+]]
+analysis succeeds
+run eval-framed to "1
+1
+"

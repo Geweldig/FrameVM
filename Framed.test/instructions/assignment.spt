@@ -1,0 +1,162 @@
+module assignment
+
+language Framed
+
+test self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			self.test2 := 2;
+			show self.test;
+			show self.test2;
+		},
+	],
+]
+]] run eval-framed to "test
+2
+"
+
+test program [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			^.^.Main.test2 := 2;
+			show self.test;
+			show ^.^.Main.test2;
+		},
+	],
+]
+]] run eval-framed to "test
+2
+"
+
+test program [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			^.test2 := 2;
+			show self.test;
+			show ^.test2;
+		},
+	],
+]
+]] run eval-framed to "test
+2
+"
+
+test program [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.value;
+			^.^.Main.value := 1337;
+			show ^.value;
+		},
+		value := 42,
+	],
+]
+]] run eval-framed to "42
+1337
+"
+
+test program [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.value;
+			^.value := 1337;
+			show ^.value;
+		},
+		value := 42,
+	],
+]
+]] run eval-framed to "42
+1337
+"
+
+test reassign entire program [[
+frame: [
+	Main := frame: [
+		start := code {
+			^.^ := 42;
+			show ^.^;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test assign reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := ^.^.Other.test;
+			^.^.Other.test.value := "works";
+			show self.test.value;
+		},
+	],
+	Other := frame: [
+		test := frame: [
+			value := "doesn't work",
+		],
+	],
+]
+]] run eval-framed to "works
+"
+
+test reassign self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self := frame: [];
+			show self;
+		},
+	],
+]
+]] run eval-framed to "[]
+"
+
+test reassign self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.intermediates := frame: [];
+			self.intermediates.currFrame := 12;
+			self := self.intermediates;
+			show self;
+		},
+	],
+]
+]] run eval-framed to "[(\"currFrame\", 12)]
+"
+
+test reassign self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.intermediates := frame: [
+				currFrame := 12,
+			];
+			self := self.intermediates;
+			show self;
+		},
+	],
+]
+]] run eval-framed to "[(\"currFrame\", 12)]
+"
+
+test reassign self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newSelf := frame: [];
+			self := self.newSelf;
+			show self;
+		},
+	],
+]
+]] run eval-framed to "[]
+"

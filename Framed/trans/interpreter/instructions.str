@@ -1,0 +1,53 @@
+module instructions
+
+imports
+    signatures/Framed-sig
+    interpreter/helpers
+    interpreter/expressions
+    interpreter/memory
+
+rules
+	get-instructions: CodePointer(instructions) -> instructions
+	get-instructions = error(|"Not an instruction:")
+
+	run-instructions: ([h|t], self, program) -> <strcat> (s_1, s_2)
+		with
+			<deb(|"Current instruction:")> h
+			; (s_1, newTail, newSelf, newProgram) := <run-instruction> (h, t, self, program)
+			; <deb(|"Got result:")> s_1
+			; s_2 := <run-instructions> (newTail, newSelf, newProgram)
+	run-instructions: ([], _, _) -> ""
+
+	run-instruction: (Assign(location, exp), t, self, program) -> ("", t, newSelf, newProgram)
+		with
+			value := <eval-exp> (exp, self, program)
+			; (newSelf, newProgram) := <do-put(|self, program)> (<unwrap-path> location, value)
+
+	run-instruction: (Show(base), t, self, program) -> (result, t, self, program)
+		with
+			value := <eval-base> (base, self, program)
+			; <deb(|"[Show] Value to show:")> value
+			; <deb(|"[Show] String representation:")> <to-string> value
+			; result := <strcat> (<to-string> value, "\n")
+
+	run-instruction: (Jump(to, with), _, self, program) -> ("", instructions, newSelf, program)
+		with
+			instructions := <get-instructions> <eval-base> (to, self, program)
+			; newSelf := <eval-base> (with, self, program)
+			; <deb(|"[Jump] Path to jump to:")> to
+			; <deb(|"[Jump] Self to jump with:")> with
+
+	run-instruction: (IfEq(b, to, with), t, self, program) -> ("", instructions, newSelf, program)
+		with
+			<deb(|"[IfEq] Evaluating base:")> b
+			; v := <eval-base> (b, self, program)
+			; <deb(|"[IfEq] Found value:")> v
+			; (newSelf, instructions) := <do-ifeq> (v, self, program, t, to, with)
+
+	do-ifeq: (0, self, program, t, to, with) -> (newSelf, instructions)
+		with
+			instructions := <get-instructions> <eval-base> (to, self, program)
+			; newSelf := <eval-base> (with, self, program)
+			; <deb(|"[IfEq] Path to jump to:")> to
+			; <deb(|"[IfEq] Self to jump with:")> with
+	do-ifeq: (_, self, _, t, _, _) -> (self, t)

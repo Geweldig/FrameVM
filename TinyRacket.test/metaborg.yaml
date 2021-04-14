@@ -1,0 +1,9 @@
+---
+id: org.example:TinyRacket.test:0.1.0-SNAPSHOT
+name: TinyRacket
+dependencies:
+  compile:
+  - org.example:TinyRacket:0.1.0-SNAPSHOT
+  - org.metaborg:org.metaborg.meta.lang.spt:${metaborgVersion}
+build:
+  useBuildSystemSpec: true

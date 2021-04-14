@@ -1,0 +1,27 @@
+module framed
+
+imports
+
+  completion/completion
+  pp
+  outline
+  analysis
+  interpreter/interpreter
+
+rules // Debugging
+
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := node
+
+rules //run
+  run-program = __run-program(eval-framed)
+  run-program-debug = __run-program(eval-framed-deb)
+
+  __run-program(strat):
+    (_, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"value")> path
+    ; result   := <strat> ast

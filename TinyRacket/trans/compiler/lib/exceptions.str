@@ -1,0 +1,45 @@
+module exceptions
+
+imports
+  compiler/lib/constants
+  compiler/lib/optimizations
+  compiler/lib/variables
+  signatures/Framed-sig
+
+rules
+  add-exception-handler: (i, f) -> (i', f')
+    where
+      <program-has> OPT_RAISE
+      ; rho_1 := <fresh>
+      ; rho_2 := <fresh>
+      ; i' := <conc> (
+        [
+          Assign(Proj(Self(), EXCEPTION_FRAME), Frame(FrameDecl([
+            Slot(HANDLER, Frame(FrameDecl([
+              Slot(FUNCTION, Base(Path(Proj(Proj(PathUp([Up(), Up()]), rho_1), START)))),
+              Slot(PARENT, Base(String(<double-quote> INVALID)))
+            ]))),
+            Slot(CALLER, Base(String(<double-quote> INVALID))),
+            Slot(RETURN, Base(String(<double-quote> INVALID))),
+            Slot(PREV_EXC_FRAME, Base(String(<double-quote> INVALID)))
+          ])))
+        ]
+        , i
+      )
+      ; f' := <conc> (
+        f
+        , [
+          Slot(rho_1, Frame(FrameDecl([
+            Slot(START, Base(CodePointer([
+              Assign(Proj(Self(), rho_2), BinOp(String(<double-quote> "uncaught exception: "), Conc(), Path(Proj(Self(), ARG)))),
+              Show(Path(Proj(Self(), rho_2)))
+            ])))
+          ])))
+        ]
+      )
+  add-exception-handler = id
+
+  add-handler-slot: slots -> <conc> (slots, [Slot(EXCEPTION_FRAME, Base(Path(Proj(Self(), EXCEPTION_FRAME))))])
+    where
+      <program-has> OPT_RAISE
+  add-handler-slot = id

@@ -1,0 +1,22 @@
+module constants
+
+imports
+  signatures/Framed-sig
+
+overlays
+  PARENT = "parent"
+  RETURN = "return"
+  CALLER = "caller"
+  ARG = "arg1"
+  CALLEE_RESULT = "callee_result"
+  FUNCTION = "function"
+  START = "start"
+  EXCEPTION_FRAME = "exc_handler"
+  HANDLER = "handler"
+  PREV_EXC_FRAME = "call_exc_frame"
+  MAIN = "Main"
+  INVALID = "INVALID"
+  PRINT_RESULT = "#<void>"
+
+strategies
+  INVALID_TERM = !String(<double-quote> INVALID)

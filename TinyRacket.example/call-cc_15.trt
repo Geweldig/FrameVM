@@ -1,0 +1,8 @@
+(let ((x 5))
+  (let ((count x))
+    (let ((fac #f))
+      (set! x
+        (* x (call-with-current-continuation (lambda (k) (set! fac k) 1))))
+      (if (equal? count 1)
+        x
+        (begin (set! count (+ count -1)) (writeln x) (fac count))))))

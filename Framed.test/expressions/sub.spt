@@ -1,0 +1,40 @@
+module sub
+
+language Framed
+
+
+test possitive numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := 84 - 42;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test negative numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := -21 - -21;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test negative numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := -21 - 21;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "-42
+"

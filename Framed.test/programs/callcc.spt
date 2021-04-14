@@ -1,0 +1,769 @@
+module callcc
+
+language Framed
+
+test call/cc ignore continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [];
+			self.callcc.k := ^.after;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "ignored
+"
+
+test call/cc ignore continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				Code := ^,
+				Container := ^.^,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "ignored
+"
+
+test call/cc ignore continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "ignored
+"
+
+test call/cc call continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [];
+			self.callcc.k := ^.after;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			jump self.k self.caller;
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "not ignored
+"
+
+test call/cc call continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				Code := ^,
+				Container := ^.^,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			jump self.k self.caller;
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "not ignored
+"
+
+test call/cc call continuation [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show "not ignored";
+		},
+		call_cc_handler := code {
+			jump self.k self.caller;
+			show "ignored";
+		},
+	],
+]
+]] run eval-framed to "not ignored
+"
+
+//Ported Call/CC examples from the test interpreters written in Haskell
+
+//(call/cc (lambda (x) (x 1337)))
+test simple callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [];
+			self.callcc.k := ^.after;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show self.arg;
+		},
+		call_cc_handler := code {
+			self.caller.arg := 1337;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "1337
+"
+
+test simple callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				Code := ^,
+				Container := ^.^,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show self.arg;
+		},
+		call_cc_handler := code {
+			self.caller.arg := 1337;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "1337
+"
+
+test simple callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.callcc := frame: [
+				k := ^.after,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after := code {
+			show self.arg;
+		},
+		call_cc_handler := code {
+			self.caller.arg := 1337;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "1337
+"
+
+//We can't really model this cleanly, as `callcc` is not an expression.
+//(+ 21 (call/cc (lambda (x) 21)))
+test more complex callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [];
+			self.newFrame.return := ^.end;
+			self.newFrame.caller := self;
+			self.newFrame.arg1 := 21;
+
+			self.callcc := frame: [];
+			self.callcc.k := ^.after_callcc;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump ^.^.Plus.start self.caller.newFrame;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 21,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump ^.^.Plus.start self.caller.newFrame;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex callcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 21,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump ^.^.Plus.start self.caller.newFrame;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+//(+ 19 (call/cc (lambda (x) 23)))
+test more complex callcc different encoding [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [];
+			self.newFrame.return := ^.end;
+			self.newFrame.caller := self;
+			self.newFrame.arg1 := 19;
+
+			self.callcc := frame: [];
+			self.callcc.return := ^.k;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		k := code {
+			self.newFrame.arg2 := self.callcc.returnValue;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (x) 23)
+		call_cc_handler := code {
+			self.returnValue := 23;
+			jump self.return self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex callcc different encoding [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 19,
+			];
+
+			self.callcc := frame: [
+				return := ^.k,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		k := code {
+			self.newFrame.arg2 := self.callcc.returnValue;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (x) 23)
+		call_cc_handler := code {
+			self.returnValue := 23;
+			jump self.return self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex callcc different encoding [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 19,
+			];
+
+			self.callcc := frame: [
+				return := ^.k,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		k := code {
+			self.newFrame.arg2 := self.callcc.returnValue;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (x) 23)
+		call_cc_handler := code {
+			self.returnValue := 23;
+			jump self.return self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+//(+ 21 (call/cc (lambda (x) (x 21))))
+test more complex calcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [];
+			self.newFrame.return := ^.end;
+			self.newFrame.caller := self;
+			self.newFrame.arg1 := 21;
+
+			self.callcc := frame: [];
+			self.callcc.k := ^.after_callcc;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex calcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 21,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test more complex calcc [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 21,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		call_cc_handler := code {
+			self.caller.newFrame.arg2 := 21;
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+//(+ 1 (call/cc (lambda (k) (+ 2 (k 3)))))
+test Break out of plus [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [];
+			self.newFrame.return := ^.end;
+			self.newFrame.caller := self;
+			self.newFrame.arg1 := 1;
+
+			self.callcc := frame: [];
+			self.callcc.k := ^.after_callcc;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.newFrame.arg2 := 3;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (k) (+ 2 (k 3)))
+		call_cc_handler := code {
+			self.newFrame := frame: [];
+			self.newFrame.return := self.k;
+			self.newFrame.caller := self;
+			self.newFrame.arg1 := 2;
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"
+
+test Break out of plus [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 1,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.newFrame.arg2 := 3;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (k) (+ 2 (k 3)))
+		call_cc_handler := code {
+			self.newFrame := frame: [
+				return := self.k,
+				caller := self,
+				arg1 := 2,
+			];
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"
+
+test Break out of plus [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 1,
+			];
+
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.newFrame.arg2 := 3;
+			jump ^.^.Plus.start self.newFrame;
+		},
+		end := code {
+			show self.result;
+		},
+		//(lambda (k) (+ 2 (k 3)))
+		call_cc_handler := code {
+			self.newFrame := frame: [
+				return := self.k,
+				caller := self,
+				arg1 := 2,
+			];
+			jump self.k self.caller;
+		},
+	],
+	Plus := frame: [
+		start := code {
+			self.caller.result := self.arg1 + self.arg2;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"
+
+
+//The starting lambda is needed to make the `call/cc` work in scheme
+//((lambda ()
+//   (define k #f)
+//   (define i 0)
+//   (call/cc (lambda (x) (set! k x)))
+//   (set! i (+ i 1))
+//   (if (> i 3)
+//       i
+//       (k -1))))
+test for loop [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.k := 0;
+			self.i := 0;
+			self.callcc := frame: [];
+			self.callcc.k := ^.after_callcc;
+			self.callcc.caller := self;
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.i := self.i + 1;
+			self.check := self.i < 4;
+			ifeq self.check ^.end self;
+			jump self.k self;
+		},
+		end := code {
+			show self.i;
+		},
+		call_cc_handler := code {
+			self.caller.k := self.k;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"
+
+test for loop [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.k := 0;
+			self.i := 0;
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				Code := ^,
+				Container := ^.^,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.i := self.i + 1;
+			self.check := self.i < 4;
+			ifeq self.check ^.end self;
+			jump self.k self;
+		},
+		end := code {
+			show self.i;
+		},
+		call_cc_handler := code {
+			self.caller.k := self.k;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"
+
+test for loop [[
+frame:[
+	Main := frame: [
+		start := code {
+			self.k := 0;
+			self.i := 0;
+			self.callcc := frame: [
+				k := ^.after_callcc,
+				caller := self,
+			];
+			jump ^.call_cc_handler self.callcc;
+		},
+		after_callcc := code {
+			self.i := self.i + 1;
+			self.check := self.i < 4;
+			ifeq self.check ^.end self;
+			jump self.k self;
+		},
+		end := code {
+			show self.i;
+		},
+		call_cc_handler := code {
+			self.caller.k := self.k;
+			jump self.k self.caller;
+		},
+	],
+]
+]] run eval-framed to "4
+"

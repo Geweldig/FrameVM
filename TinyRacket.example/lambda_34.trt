@@ -1,0 +1,21 @@
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (let ((check1 (> 1 x)))
+        (let ((result1
+               (if check1
+                 0
+                 (let ((result2
+                        (let ((check2 (> 2 x)))
+                          (if check2
+                            1
+                            (let ((call1 (+ x -1)))
+                              (let ((call1result (fibonacci call1)))
+                                (let ((call2 (+ x -2)))
+                                  (let ((call2result (fibonacci call2)))
+                                    (let ((plusresult
+                                           (+ call1result call2result)))
+                                      plusresult)))))))))
+                   result2))))
+          result1))))
+  (fibonacci 5))

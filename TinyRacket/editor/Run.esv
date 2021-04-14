@@ -1,0 +1,5 @@
+module Compile
+
+menus
+  	menu: "Run (with racket)" (source)
+    	action: "run"   		           	   = run-official-interpreter

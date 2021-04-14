@@ -1,0 +1,121 @@
+module parse
+
+language Framed
+
+test parse [[
+frame: [
+	Program_1 := frame: [
+	  Main := frame: [
+	    start := code {
+	      self.letBind := frame: [];
+	      self.letBind.var_example := 0;
+	      self := self.letBind;
+	      self.var_example := frame: [
+	      	parent := self,
+	      	code_pointer := ^.^.ExampleLambda.start,
+	      ];
+	      self.newFrame := frame: [];
+	      self.newFrame.return := self.Code.lbl_return_17;
+	      self.newFrame.caller := self;
+	      self.newFrame.arg1 := 9;
+	      jump self.var_example self.newFrame;
+
+	    },
+	  ],
+	  ExampleLambda := frame: [
+	  	start := code {
+	  		jump ^.if_block self;
+	  	},
+	  	if_block := code {
+	  	},
+	  	else_block := code {
+	  	},
+	  	end := code {
+	  		jump self.return self.caller;
+	  	},
+	  ],
+	],
+	Library := frame: [
+		do_something := code {},
+	],
+	Main := frame: [
+		start := code {
+		},
+	],
+]
+]] parse succeeds
+
+test parse [[
+frame: [
+	Program := frame: [
+	  Main := frame: [
+	    start := code {
+	      self.letBind := frame: [];
+	      self.letBind.var_example := 0;
+	      self := self.letBind;
+	      self.var_example := frame: [
+	      	parent := self,
+	      ];
+	      self.newFrame := frame: [];
+	      self.newFrame.return := self.Code.lbl_return_17;
+	      self.newFrame.caller := self;
+	      self.newFrame.arg1 := 9;
+	      jump self.var_example self.newFrame;
+
+	    },
+	  ],
+	  ExampleLambda := frame: [
+	  	start := code {
+	  		jump ^.if_block self;
+	  	},
+	  	if_block := code {
+	  	},
+	  	else_block := code {
+	  	},
+	  	end := code {
+	  		jump self.return self.caller;
+	  	},
+	  ],
+	],
+	Library := frame: [
+	],
+	Main := frame: [],
+]
+]] parse succeeds
+
+test parse [[
+frame: [
+	Program := frame: [
+	  Main := frame: [
+	    start := code {
+	      self.letBind := frame: [];
+	      self.letBind.var_example := 0;
+	      self := self.letBind;
+	      self.var_example := frame: [
+	      	parent := self,
+	      ];
+	      self.newFrame := frame: [];
+	      self.newFrame.return := self.Code.lbl_return_17;
+	      self.newFrame.caller := self;
+	      self.newFrame.arg1 := 9;
+	      jump self.var_example self.newFrame;
+
+	    },
+	  ],
+	  ExampleLambda := frame: [
+	  	start := code {
+	  		jump ^.if_block self;
+	  	},
+	  	if_block := code {
+	  	},
+	  	else_block := code {
+	  	},
+	  	end := code {
+	  		jump self.return self.caller;
+	  	},
+	  ],
+	],
+	Library := frame: [],
+	Main := frame: [],
+]
+]] parse succeeds

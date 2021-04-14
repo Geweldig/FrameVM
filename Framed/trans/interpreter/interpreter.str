@@ -1,0 +1,36 @@
+module interpreter
+
+imports
+    signatures/Framed-sig
+    interpreter/helpers
+    interpreter/instructions
+    interpreter/expressions
+    interpreter/desugar
+    interpreter/memory
+
+rules
+	eval-framed-deb: program -> <__eval-framed> program
+		with
+			<set-config> ("debug", 1)
+
+	eval-framed = __eval-framed
+
+	__eval-framed: program@FrameDecl(_) -> result
+		with
+			prepared := <strip-annos; desugar-all> program
+			; programFrames := <build-frame> prepared
+			; mainFrame := <init-frame(|[programFrames])> []
+			; currentPath := ["Main", "start"]
+
+			; <deb(|"Program to run:")> programFrames
+			; <deb(|"Will start running at path:")> currentPath
+
+			; result := <run-framed> (mainFrame, programFrames, currentPath)
+			; <get-config> "debug" < gc-print-stats + id
+
+	run-framed: (self, program, path) -> result
+		with
+			todo := <fetch(|program)> path
+			; <deb(|"Instructions to perform:")> todo
+			; instructions := <get-instructions> todo
+			; result := <run-instructions> (instructions, self, program)

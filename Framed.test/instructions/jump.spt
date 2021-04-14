@@ -1,0 +1,308 @@
+module jump
+
+language Framed
+
+test simple jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			jump ^.^.Main.end self;
+		},
+		end := code {
+			show "end";
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			jump ^.end self;
+		},
+		end := code {
+			show "end";
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with new self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			self.newSelf := frame: [];
+			self.newSelf.value := "end";
+			jump ^.^.Main.end self.newSelf;
+		},
+		end := code {
+			show self.value;
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with new self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			self.newSelf := frame: [
+				value := "end",
+			];
+			jump ^.^.Main.end self.newSelf;
+		},
+		end := code {
+			show self.value;
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with new self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			self.newSelf := frame: [];
+			self.newSelf.value := "end";
+			jump ^.end self.newSelf;
+		},
+		end := code {
+			show self.value;
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with new self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			self.newSelf := frame: [
+				value := "end",
+			];
+			jump ^.end self.newSelf;
+		},
+		end := code {
+			show self.value;
+		},
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with strange self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			jump ^.^.Main.end ^.^.Main;
+		},
+		end := code {
+			show self.value;
+		},
+		value := "end",
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+test simple jump with strange self [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "start";
+			jump ^.end ^;
+		},
+		end := code {
+			show self.value;
+		},
+		value := "end",
+	],
+]
+]] run eval-framed to "start
+end
+"
+
+//Exceptions
+//CallCC
+test simple call/return [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 19,
+			];
+			jump ^.^.Calculate.start self.newFrame;
+		},
+		end := code {
+			self.result := self.newFrame.returnValue;
+			show self.result;
+		},
+	],
+	Calculate := frame: [
+		start := code {
+			self.returnValue := self.arg1 + 23;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test factorial [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 4,
+			];
+			jump ^.^.Factorial.start self.newFrame;
+		},
+		end := code {
+			self.result := self.newFrame.returnValue;
+			show self.result;
+		},
+	],
+	Factorial := frame: [
+		start := code {
+			ifeq self.arg1 ^.end self;
+			self.newFrame := frame: [
+				return := ^.afterFac,
+				caller := self,
+				arg1 := self.arg1 - 1,
+			];
+			jump ^.start self.newFrame;
+		},
+		afterFac := code {
+			self.result := self.newFrame.returnValue;
+			self.returnValue := self.result * self.arg1;
+			jump self.return self.caller;
+		},
+		end := code {
+			self.returnValue := 1;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "24
+"
+
+test factorial exception [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := -1,
+				exc := ^.handler,
+			];
+			jump ^.^.Factorial.start self.newFrame;
+		},
+		end := code {
+			self.result := self.newFrame.returnValue;
+			show self.result;
+		},
+		handler := code {
+			self.exception := self.arg1;
+			self.message := "Integer became negative: " # self.exception;
+			show self.message;
+		},
+	],
+	Factorial := frame: [
+		start := code {
+			self.isNegative := self.arg1 < 0;
+			self.isPositive := !self.isNegative;
+			ifeq self.isPositive self.exc self;
+			self.newFrame := frame: [
+				return := ^.afterFac,
+				caller := self,
+				arg1 := self.arg1 - 1,
+			];
+			jump self.Code.start self.newFrame;
+		},
+		afterFac := code {
+			self.result := self.newFrame.returnValue;
+			self.returnValue := self.result * self.arg1;
+			jump self.return self.caller;
+		},
+		end := code {
+			self.returnValue := 1;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "Integer became negative: -1
+"
+
+test factorial exception [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.newFrame := frame: [
+				return := ^.end,
+				caller := self,
+				arg1 := 1,
+				exc := ^.handler,
+			];
+			jump ^.^.Factorial.start self.newFrame;
+		},
+		end := code {
+			self.result := self.newFrame.returnValue;
+			show self.result;
+		},
+		handler := code {
+			self.exception := self.arg1;
+			self.message := "Integer became negative: " # self.exception;
+			show self.message;
+		},
+	],
+	Factorial := frame: [
+		start := code {
+			self.isNegative := self.arg1 < 0;
+			self.isPositive := !self.isNegative;
+			ifeq self.isPositive self.exc self;
+			self.newFrame := frame: [
+				return := ^.afterFac,
+				caller := self,
+				arg1 := self.arg1 - 1,
+				exc := self.exc,
+			];
+			jump ^.start self.newFrame;
+		},
+		afterFac := code {
+			self.result := self.newFrame.returnValue;
+			self.returnValue := self.result * self.arg1;
+			jump self.return self.caller;
+		},
+		end := code {
+			self.returnValue := 1;
+			jump self.return self.caller;
+		},
+	],
+]
+]] run eval-framed to "Integer became negative: -1
+"

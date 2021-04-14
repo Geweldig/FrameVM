@@ -1,0 +1,12 @@
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			self.underscore := "_";
+			self.fourtytwo := 42;
+			self.to_show := self.test # self.underscore;
+			self.to_show := self.to_show # self.fourtytwo;
+			show self.to_show;
+		},
+	],
+]

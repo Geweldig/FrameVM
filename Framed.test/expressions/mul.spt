@@ -1,0 +1,40 @@
+module mul
+
+language Framed
+
+test number multiplication [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := 2 * 21;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test multiplication negative numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := -21 * -2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test multiplying self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := 1 + 1;
+			self.test := self.test * self.test;
+			show self.test;
+		},
+	],
+]
+]] run eval-framed to "4
+"

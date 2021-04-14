@@ -1,0 +1,8 @@
+(with-handlers
+ (((lambda (x) #t) (lambda (x) x)))
+ (letrec ((fibonacci
+           (lambda (x)
+             (if (> 0 x)
+               (raise 42)
+               (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+   (fibonacci 6)))

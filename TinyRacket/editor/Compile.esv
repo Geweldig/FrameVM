@@ -1,0 +1,7 @@
+module Compile
+
+menus
+  	menu: "Compile" (openeditor)
+    	action: "compile"   		           = compile-program
+    	action: "compile and run"              = run-program
+    	action: "compile and run (with debug)" = run-program-debug

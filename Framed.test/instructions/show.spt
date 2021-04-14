@@ -1,0 +1,150 @@
+module show
+
+language Framed
+
+test program reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.^.Main.value;
+		},
+		value := 1,
+	],
+]
+]] run eval-framed to "1
+"
+
+test program reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.value;
+		},
+		value := 1,
+	],
+]
+]] run eval-framed to "1
+"
+
+test program reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.^.Main.value;
+		},
+		value := "test",
+	],
+]
+]] run eval-framed to "test
+"
+
+test program reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.value;
+		},
+		value := "test",
+	],
+]
+]] run eval-framed to "test
+"
+
+test hashtable reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := ^.test;
+			show self.test.value;
+		},
+		test := frame: [
+			value := "works",
+		],
+	],
+]
+]] run eval-framed to "works
+"
+
+test program reference [[
+frame: [
+  Main := frame: [
+    start := code {
+      show ^.value;
+    },
+    value := 42,
+  ],
+]
+]] run eval-framed to "42
+"
+
+test program reference [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.value;
+		},
+		value := "test",
+	],
+]
+]] run eval-framed to "test
+"
+
+test self, multi line [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			self.test2 := 2;
+			show self.test;
+			show self.test2;
+		},
+	],
+]
+]] run eval-framed to "test
+2
+"
+
+test self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.key := "value";
+			show self;
+		},
+	],
+]
+]] run eval-framed to "[(\"key\", \"value\")]
+"
+
+test CodePointer [[
+frame: [
+	Main := frame: [
+		start := code {
+			show ^.start;
+		},
+	],
+]
+]] run eval-framed to "CodePointer([Show(Path(Proj([\"Main\"], \"start\")))])
+"
+
+test program [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.key := "value";
+			show ^.^;
+		},
+	],
+]
+]] run eval-framed to "[ ( \"Main\"
+  , [ ( \"start\"
+      , CodePointer(
+          [ Assign(Proj(Self(), \"key\"), Base(String(\"\"value\"\")))
+          , Show(Path([]))
+          ]
+        )
+      )
+    ]
+  )
+]
+"

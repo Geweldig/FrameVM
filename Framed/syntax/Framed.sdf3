@@ -1,0 +1,68 @@
+module Framed
+
+imports
+  Common
+
+context-free start-symbols
+  FrameDecl
+
+context-free syntax
+  FrameDecl.FrameDecl = <
+    frame: [
+      <{SlotDecl ",\n"}+; float>,
+    ]
+  >
+
+  FrameDecl.FrameEmpty = <
+    frame: []
+  >
+
+  SlotDecl.Slot = <<ID> := <Exp>>
+
+  Base.Int = <<INT>>
+  Base.String = <<STRING>>
+  Base.Path = <<Path>>
+  Base.CodePointer = <
+    code {
+      <{Instr ";\n"}+; float>;
+    }
+  >
+  Base.CodeEmpty = <
+    code {}
+  >
+
+  Exp.Base = <<Base; float>>
+  Exp.BinOp = <<Base> <BinOp> <Base>> {left}
+  Exp.Not = <!<Base>>
+  Exp.Frame = <<FrameDecl; float>>
+
+  BinOp.Plus = <+>
+  BinOp.Div = </>
+  BinOp.Mul = <*>
+  BinOp.Sub = <->
+  BinOp.Eq = <==>
+  BinOp.Conc = <#>
+  BinOp.And = <&&>
+  BinOp.Or =  <||>
+  BinOp.Lt = <\<>
+
+
+  Path.Proj = <<Path>.<ID>>
+  Path.PathUp = <<{Up "."}+>>
+  Path.Self = <self>
+  Up.Up = <^>
+
+  Instr.Assign = <<Path> := <Exp>>
+  //If value is zero
+  Instr.IfEq = <ifeq <Base> <Base> <Base>>
+  Instr.Show = <show <Base>>
+  Instr.Jump = <jump <Base> <Base>>
+
+context-free priorities
+  Exp.Not
+  > Instr.Assign
+
+template options
+
+  keyword -/- [\_A-Za-z]
+  tokenize : "[().{:"

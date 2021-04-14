@@ -1,0 +1,450 @@
+module expressions
+
+imports
+  compiler/lib/constants
+  compiler/lib/exceptions
+  compiler/lib/optimizations
+  compiler/lib/slotter
+  compiler/lib/variables
+  signatures/Framed-sig
+  signatures/TinyRacket-sig
+
+rules
+  compile-exps: program -> result
+    with
+      <setup-optimizations> program
+      ; (v, i, f) := <compile-exp> program
+      ; (i', f') := <add-exception-handler> (i, f)
+      ; s := <__add-show(|v); from-flat> [CodeSlotStart(START) | i']
+      ; result :=
+      FrameDecl(<conc> (
+        [Slot(MAIN, Frame(FrameDecl(s)))]
+        , f'
+      ))
+
+  __add-show(|String(_)): instr -> instr
+  __add-show(|v): instr -> <conc> (instr, [Show(v)])
+
+rules
+  compile-exp: BinOp(And(), e1, e2) -> (
+    Path(Proj(Self(), rho_1)),
+    <concat> [
+      i1,
+      [
+        IfEq(v1, Path(Proj(PathUp([Up()]), rho_2)), Path(Self()))
+      ],
+      i2,
+      [
+        IfEq(v2, Path(Proj(PathUp([Up()]), rho_2)), Path(Self())),
+        Assign(Proj(Self(), rho_1), Base(Int("1"))),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_3)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_2),
+        Assign(Proj(Self(), rho_1), Base(Int("0"))),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_3)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_3)
+      ]
+    ],
+    <concat> [f1, f2]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; rho_3 := <fresh>
+    ; (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+  compile-exp: BinOp(Or(), e1, e2) -> (
+    Path(Proj(Self(), rho_1)),
+    <concat> [
+      i1,
+      [
+        IfEq(v1, Path(Proj(PathUp([Up()]), rho_2)), Path(Self())),
+        Assign(Proj(Self(), rho_1), Base(Int("1"))),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_4)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_2)
+      ],
+      i2,
+      [
+        IfEq(v2, Path(Proj(PathUp([Up()]), rho_3)), Path(Self())),
+        Assign(Proj(Self(), rho_1), Base(Int("1"))),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_4)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_3),
+        Assign(Proj(Self(), rho_1), Base(Int("0"))),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_4)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_4)
+      ]
+    ],
+    <concat> [f1, f2]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; rho_3 := <fresh>
+    ; rho_4 := <fresh>
+    ; (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+  compile-exp: BinOp(op, e1, e2) -> (
+    Path(Proj(Self(), rho))
+    , <concat> [
+      i1,
+      i2,
+      [
+        Assign(Proj(Self(), rho), <__generate-binop(|op)> (v1, v2))
+      ]
+    ]
+    , <concat> [f1, f2]
+  ) with
+    rho := <fresh>
+    ; (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+  __generate-binop(|Plus()): (v1, v2) -> BinOp(v1, Plus(), v2)
+  __generate-binop(|Mul()): (v1, v2) -> BinOp(v1, Mul(), v2)
+  __generate-binop(|Gt()): (v1, v2) -> BinOp(v2, Lt(), v1)
+  __generate-binop(|Eq()): (v1, v2) -> BinOp(v1, Eq(), v2)
+
+rules
+  compile-exp: Not(e) -> (
+    Path(Proj(Self(), rho))
+    , <concat> [
+      i,
+      [
+        Assign(Proj(Self(), rho), Not(v))
+      ]
+    ],
+    f
+  ) with
+    rho := <fresh>
+    ; (v, i, f) := <compile-exp> e
+
+rules
+  compile-exp: If(e1, e2, e3) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      i1,
+      [
+        IfEq(
+          v1,
+          Path(Proj(PathUp([Up()]), rho_2)),
+          Path(Self())
+        )
+      ],
+      i2,
+      [
+        Assign(Proj(Self(), rho_1), <wrap-value> v2),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_3)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_2)
+      ],
+      i3,
+      [
+        Assign(Proj(Self(), rho_1), <wrap-value> v3),
+        Jump(
+          Path(Proj(PathUp([Up()]), rho_3)),
+          Path(Self())
+        ),
+        CodeSlotStart(rho_3)
+      ]
+    ]
+    , <concat> [f1, f2, f3]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; rho_3 := <fresh>
+    ; (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+    ; (v3, i3, f3) := <compile-exp> e3
+
+rules
+  compile-exp: Show(e) -> (
+    String(<double-quote> PRINT_RESULT)
+    , <concat> [
+      i,
+      [Show(v)]
+    ]
+    , f
+  ) with
+    (v, i, f) := <compile-exp> e
+
+rules
+  compile-exp: Seq(e1, e2) -> (
+    v2
+    , <concat> [
+      i1,
+      i2
+    ]
+    , <concat> [
+      f1,
+      f2
+    ]
+  )  with
+    (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+rules
+  compile-exp: Var(n) -> (
+    Path(Proj(Self(), rho))
+    , [Assign(Proj(Self(), rho), Base(Path(v)))]
+    , []
+  ) where
+    <program-has> OPT_CALLCC
+    ; v := <get-var-slot> n
+    ; rho := <fresh>
+
+  compile-exp: Var(n) -> (
+    Path(v)
+    , []
+    , []
+  ) with
+    v := <get-var-slot> n
+
+rules
+  compile-exp: Let(binds, e) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      bis,
+      [
+        Assign(Self(), Frame(FrameDecl(<concat; add-handler-slot> [
+          [Slot(PARENT, Base(Path(Self())))],
+          bvs
+        ])))
+      ],
+      i,
+      [
+        Assign(Proj(Proj(Self(), PARENT), rho_1), <wrap-value> v),
+        Assign(Self(), Base(Path(Proj(Self(), PARENT))))
+      ]
+    ]
+    , <concat> [bfs, f]
+  ) with
+    rho_1 := <fresh>
+    ; (bvs, bis, bfs) := <map(compile-let-bind); __flatten-binds> binds
+    ; (v, i, f) := <compile-exp> e
+
+  compile-let-bind: Bind(n, e) -> (Slot(<get-var-name> n, <wrap-value> v), i, f)
+    with
+      (v, i, f) := <compile-exp> e
+
+  __flatten-binds: binds -> <__recur-flatten-binds> ([], [], [], binds)
+  __recur-flatten-binds: (bvs, bis, bfs, []) -> (bvs, bis, bfs)
+  __recur-flatten-binds: (bvs, bis, bfs, [(v, i, f) | tail]) -> result
+    with
+      bvs' := <conc> (bvs, [v])
+      ; bis' := <conc> (bis, i)
+      ; bfs' := <conc> (bfs, f)
+      ; result := <__recur-flatten-binds> (bvs', bis', bfs', tail)
+
+rules
+  compile-exp: LetRec(binds, e) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat>[
+      [
+        Assign(Self(), Frame(FrameDecl(<add-handler-slot> [
+          Slot(PARENT, Base(Path(Self())))
+        ])))
+      ],
+      bis,
+      i,
+      [
+        Assign(Proj(Proj(Self(), PARENT), rho_1), <wrap-value> v),
+        Assign(Self(), Base(Path(Proj(Self(), PARENT))))
+      ]
+    ]
+    , <concat> [bfs, f]
+  ) with
+    rho_1 := <fresh>
+    ; (bis, bfs) := <compile-letrec-binds> ([], [], binds)
+    ; (v, i, f) := <compile-exp> e
+
+  compile-letrec-binds: (bis, bfs, []) -> (bis, bfs)
+  compile-letrec-binds: (bis, bfs, [Bind(n, e) | tail]) -> result
+    with
+      (v, i, f) := <compile-exp> e
+      ; bis' := <concat> [
+        bis,
+        i,
+        [Assign(Proj(Self(), <get-var-name> n), <wrap-value> v)]
+      ]
+      ; bfs' := <concat> [bfs, f]
+      ; result := <compile-letrec-binds> (bis', bfs', tail)
+
+rules
+  compile-exp: Assign(n, e) -> (
+    Path(variable_slot),
+    <concat> [
+      i,
+      [Assign(variable_slot, <wrap-value> v)]
+    ],
+    f
+  ) with
+    (v, i, f) := <compile-exp> e
+    ; variable_slot := <get-var-slot> n
+
+rules
+  compile-exp: Lambda(n, e) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      [
+        Assign(Proj(Self(), rho_1), Frame(FrameDecl([
+          Slot(FUNCTION, Base(Path(Proj(Proj(PathUp([Up(), Up()]), rho_2), START)))),
+          Slot(PARENT, Base(Path(Self())))
+        ])))
+      ]
+    ]
+    , <concat> [
+      f,
+      [Slot(
+        rho_2,
+          Frame(
+            FrameDecl(
+              <concat; from-flat> [
+                [
+                  CodeSlotStart(START),
+                  Assign(Proj(Self(), <get-var-name> n), Base(Path(Proj(Self(), ARG))))
+                ],
+                i,
+                [
+                  Assign(Proj(Proj(Self(), CALLER), CALLEE_RESULT), <wrap-value> v),
+                  Jump(Path(Proj(Self(), RETURN)), Path(Proj(Self(), CALLER)))
+                ]
+              ]
+            )
+          )
+        )
+      ]
+    ]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; (v, i, f) := <compile-exp> e
+
+rules
+  compile-exp: Call(e1, e2) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      i1,
+      i2,
+      [
+        Assign(Self(), Frame(FrameDecl(<add-handler-slot> [
+          Slot(RETURN, Base(Path(Proj(PathUp([Up()]), rho_2)))),
+          Slot(CALLER, Base(Path(Self()))),
+          Slot(ARG, <wrap-value> v2),
+          Slot(PARENT, Base(Path(Proj(v1, PARENT))))
+        ]))),
+        Jump(Path(Proj(<bottomup(?Self() < !Proj(Self(), CALLER) + id)> v1, FUNCTION)), Path(Self())),
+        CodeSlotStart(rho_2),
+        Assign(Proj(Self(), rho_1), Base(Path(Proj(Self(), CALLEE_RESULT))))
+      ]
+    ]
+    , <concat> [f1, f2]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; (Path(v1), i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+rules
+  compile-exp: CallCC(e) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      i,
+      [
+        Assign(Self(), Frame(FrameDecl([
+          Slot(RETURN, Base(Path(Proj(PathUp([Up()]), rho_3)))),
+          Slot(CALLER, Base(Path(Self()))),
+          Slot(ARG, Frame(FrameDecl([
+            Slot(FUNCTION, Base(Path(Proj(PathUp([Up()]), rho_2)))),
+            Slot(PARENT, Base(Path(Self())))
+          ]))),
+          Slot(PARENT, Base(Path(Proj(v, PARENT))))
+        ]))),
+        Jump(Path(Proj(<bottomup(?Self() < !Proj(Self(), CALLER) + id)> v, FUNCTION)), Path(Self())),
+        CodeSlotStart(rho_2),
+        Assign(Proj(Proj(Self(), PARENT), CALLEE_RESULT), Base(Path(Proj(Self(), ARG)))),
+        Assign(Self(), Base(Path(Proj(Self(), PARENT)))),
+        Jump(Path(Proj(PathUp([Up()]), rho_3)), Path(Self())),
+        CodeSlotStart(rho_3),
+        Assign(Proj(Self(), rho_1), Base(Path(Proj(Self(), CALLEE_RESULT))))
+      ]
+    ]
+    , f
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; rho_3 := <fresh>
+    ; (Path(v), i, f) := <compile-exp> e
+
+rules
+  compile-exp: Raise(e) -> (
+    <INVALID_TERM>
+    , <concat> [
+      i
+      , [
+          Assign(Self(), Frame(FrameDecl([
+            Slot(RETURN, Base(Path(Proj(Proj(Self(), EXCEPTION_FRAME), RETURN)))),
+            Slot(PARENT, Base(Path(Proj(Proj(Proj(Self(), EXCEPTION_FRAME), HANDLER), PARENT)))),
+            Slot(CALLER, Base(Path(Proj(Proj(Self(), EXCEPTION_FRAME), CALLER)))),
+            Slot(EXCEPTION_FRAME, Base(Path(Proj(Proj(Self(), EXCEPTION_FRAME), PREV_EXC_FRAME)))),
+            Slot(rho, Base(Path(Proj(Proj(Proj(Self(), EXCEPTION_FRAME), HANDLER), FUNCTION)))),
+            Slot(ARG, <wrap-value> v)
+          ]))),
+          Jump(Path(Proj(Self(), rho)), Path(Self()))
+      ]
+    ]
+    , f
+  ) with
+    rho := <fresh>
+    ; (v, i, f) := <compile-exp> e
+
+rules
+  compile-exp: WithHandlers(e1, e2) -> (
+    Path(Proj(Self(), rho_1))
+    , <concat> [
+      i1,
+      [
+        Assign(Self(), Frame(FrameDecl([
+          Slot(PARENT, Base(Path(Self()))),
+          Slot(EXCEPTION_FRAME, Frame(FrameDecl([
+            Slot(RETURN, Base(Path(Proj(PathUp([Up()]), rho_2)))),
+            Slot(CALLER, Base(Path(Self()))),
+            Slot(HANDLER, Base(v1)),
+            Slot(PREV_EXC_FRAME, Base(Path(Proj(Self(), EXCEPTION_FRAME))))
+          ])))
+        ])))
+      ],
+      i2,
+      [
+        Assign(Proj(Proj(Self(), PARENT), CALLEE_RESULT), <wrap-value> v2),
+        Jump(Path(Proj(PathUp([Up()]), rho_2)), Path(Proj(Self(), PARENT))),
+        CodeSlotStart(rho_2),
+        Assign(Proj(Self(), rho_1), Base(Path(Proj(Self(), CALLEE_RESULT))))
+      ]
+    ]
+    , <concat> [f1, f2]
+  ) with
+    rho_1 := <fresh>
+    ; rho_2 := <fresh>
+    ; (v1, i1, f1) := <compile-exp> e1
+    ; (v2, i2, f2) := <compile-exp> e2
+
+rules
+  compile-exp: Block(e) -> <compile-exp> e
+  compile-exp: IntE(i) -> (Int(<strip-annos> i), [], [])
+  compile-exp: BoolE(True()) -> (Int("1"), [], [])
+  compile-exp: BoolE(False()) -> (Int("0"), [], [])

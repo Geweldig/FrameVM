@@ -1,0 +1,91 @@
+module not
+
+language Framed
+
+test int 1 [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := 1;
+			self.to_show := !self.test;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test string [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := "test";
+			self.to_show := !self.test;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := frame: [];
+			self.to_show := !self.test;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := !self;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test int 0 [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := 0;
+			self.to_show := !self.test;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test int 0 [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := !0;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test int 1 [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := !1;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"

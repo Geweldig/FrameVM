@@ -1,0 +1,193 @@
+module memory
+
+imports
+	libspoofax/stratego/debug
+
+//Garbage collection
+rules
+	init-gc = table-hashtable; hashtable-get(|MEMORY)
+	init-gc = <table-create> MEMORY
+		; <table-putlist> (MEMORY, [
+			//Configuration of garbage collector
+			(MAX_FRAMES, 40),			//How many frames can exists at the same time
+			(MAX_SLOTS, 25),			//How many slots can a single frame have
+			(MAX_TOTAL_SLOTS, 250),		//How many slots can all frames combined have
+			(SLOT_CAPACITY, 75),		//At what percentage of `MAX_TOTAL_SLOTS` should the garbage collector be invoked
+			(FRAME_CAPACITY, 75),		//At what percentage of `MAX_FRAMES` should the garbage collector be invoked
+
+			//Used for data tracking, shouldn't need to be changed.
+			(FRAMES, []),
+			(MARKS, []),
+			(COLLECTED, 0),
+			(SLOTS, 0),
+			(CONCURRENT_FRAMES, 0),
+			(CONCURRENT_SLOTS, 0),
+			(CONCURRENT_TOTAL_SLOTS, 0)
+	    ])
+
+	gc: accessibleData -> ()
+		where
+			(is-over-frame-capacity + is-over-slot-capacity)
+			; <uniq; map(do-mark)> accessibleData
+			; sweep
+	gc = id
+
+	do-mark: h@Hashtable(_) -> ()
+		where
+			not(<is-marked> h)
+			; <mark> h
+			; <map(do-mark)> <hashtable-values> h
+	do-mark = id
+
+	sweep = <map(collect)> <get-refs>
+
+	collect: h -> ()
+		where
+			<is-marked> h
+			; <unmark> h
+
+	collect: h -> ()
+		with
+			<remove-ref> h
+			; inc-collected
+			; <add-slots> <hashtable-keys; length> h
+			; <hashtable-destroy> h
+
+	gc-print-stats: _ -> ()
+		with
+			  <ppdebugna(|"")> "====================================================="
+			; <ppdebugna(|"{GC} Number of frames garbage collected:          ")> <get-collected>
+			; <ppdebugna(|"{GC} Number of slots garbage collected:           ")> <get-slots>
+			; <ppdebugna(|"{GC} Maximum reached number of concurrent frames: ")> <get-concurrent-frames>
+			; <ppdebugna(|"{GC} Maximum allowed number of frames:            ")> <get-max-frames>
+			; <ppdebugna(|"{GC} Maximum reached number of slots in frame:    ")> <get-concurrent-slots>
+			; <ppdebugna(|"{GC} Maximum allowed number of slots:             ")> <get-max-slots>
+			; <ppdebugna(|"{GC} Maximum reached number of total slots:       ")> <get-concurrent-total-slots>
+			; <ppdebugna(|"{GC} Maximum allowed number of total slots:       ")> <get-max-total-slots>
+			; <ppdebugna(|"")> "====================================================="
+
+	is-over-slot-capacity = __check-capacity(get-current-total-slots, get-max-slots, get-slot-capacity)
+	is-over-frame-capacity = __check-capacity(get-current-total-frames, get-max-frames, get-frame-capacity)
+
+	__check-capacity(current-count, max-count, capacity) = <geq> (<mul> (<div> (<current-count>, <max-count>), 100), <capacity>)
+
+//All frame interaction
+rules
+	init-frame(|accessibleData): slots -> new_frame
+		with
+			init-gc
+			; <gc> accessibleData
+			; slots_count := <length> slots
+			; <check-max-slots-reached> slots_count
+			; <check-max-total-slots-reached> slots_count
+			; check-max-frames-reached
+
+			; new_frame := <hashtable-init> slots
+			; <store-ref> new_frame
+
+	frame-put(|k, v, _): h ->  <hashtable-put(|k, v)> h
+		where
+			<elem> (k, <hashtable-keys> h)
+	frame-put(|k, v, accessibleFrames): h ->  <hashtable-put(|k, v)> h
+		with
+			<conc; gc> (accessibleFrames, [v, h])
+			; key_length := <hashtable-keys; length; inc> h
+			; <check-max-slots-reached> key_length
+			; <check-max-total-slots-reached> 1
+
+	frame-get(|k) = hashtable-get(|k)
+	frame-getlist = hashtable-getlist
+	frame-keys = hashtable-keys
+	frame-eq = hashtable-eq
+	frame-fold(s|a) = hashtable-fold(s|a)
+
+//Get limits
+rules
+	get-max-frames = __get(|MAX_FRAMES)
+	get-max-slots = __get(|MAX_SLOTS)
+	get-max-total-slots = __get(|MAX_TOTAL_SLOTS)
+
+	get-slot-capacity = __get(|SLOT_CAPACITY)
+	get-frame-capacity = __get(|FRAME_CAPACITY)
+
+//Check if limits have been reached
+rules
+	check-max-frames-reached: _ -> ()
+		where
+			frames_count := <inc> <get-current-total-frames>
+			; <geq> (<get-max-frames>, frames_count)
+			; <store-concurrent-frames> frames_count
+	check-max-frames-reached = do-fail(get-max-frames | "{GC} Frame can not be initialised, max number of frames has been reached: ")
+
+	check-max-slots-reached: slots -> ()
+		where
+			<geq> (<get-max-slots>, slots)
+			; <store-concurrent-slots> slots
+	check-max-slots-reached = do-fail(get-max-slots | "{GC} Slot can not be assigned. Max number of slots in frame has been reached: ")
+
+	check-max-total-slots-reached: new_slots -> ()
+		where
+			total_slots := <addi> (<get-current-total-slots>, new_slots)
+			; <geq> (<get-max-total-slots>, total_slots)
+			; <store-concurrent-total-slots> total_slots
+	check-max-total-slots-reached = do-fail(get-max-total-slots | "{GC} Slot can not be assigned. Max total slots has been reached: ")
+
+	do-fail(get-value | message) = with(get-value; ppdebugna(|message); fail)
+
+	get-current-total-frames = get-refs; length
+	get-current-total-slots = <map(count-slots); sum> <get-refs>
+	count-slots = hashtable-keys; length
+
+//Helpers for mark/sweep
+rules
+	store-ref = __add(|FRAMES)
+	remove-ref = __del(|FRAMES)
+	get-refs = __get(|FRAMES)
+
+	mark = __add(|MARKS)
+	unmark = __del(|MARKS)
+	get-marks = __get(|MARKS)
+	is-marked: ref -> <elem> (ref, <get-marks>)
+
+//Tracking statistics
+rules
+	get-concurrent-frames = __get(|CONCURRENT_FRAMES)
+	store-concurrent-frames: count -> <__store-value(|CONCURRENT_FRAMES)> count
+
+	get-concurrent-slots = __get(|CONCURRENT_SLOTS)
+	store-concurrent-slots: count -> <__store-value(|CONCURRENT_SLOTS)> count
+
+	get-concurrent-total-slots = __get(|CONCURRENT_TOTAL_SLOTS)
+	store-concurrent-total-slots: count ->  <__store-value(|CONCURRENT_TOTAL_SLOTS)> count
+
+	get-collected = __get(|COLLECTED)
+	inc-collected = <__put(|COLLECTED)> <inc> <get-collected>
+	get-slots = __get(|SLOTS)
+	add-slots: num -> <__put(|SLOTS)> <addi> (<get-slots>, num)
+
+	__store-value(|slot): count -> <__put(|slot)> count
+		where
+			<gt> (count, <__get(|slot)>)
+	__store-value(|_) = id
+
+//Generic helpers
+rules
+	__put(|slot): val -> <table-put> (MEMORY, slot, val)
+	__add(|slot): ref -> <__put(|slot)> <conc; uniq> (<__get(|slot)>, [ref])
+	__del(|slot): ref -> <table-put> (MEMORY, slot, <remove-all(equal(|ref))> <__get(|slot)>)
+	__get(|slot) = <table-get> (MEMORY, slot)
+
+overlays
+	MEMORY = "memory"
+	FRAMES = "frames"
+	MARKS = "marks"
+	COLLECTED = "collected"
+	SLOTS = "slots"
+	MAX_FRAMES = "maximum_frames"
+	MAX_SLOTS = "maximum_slots"
+	MAX_TOTAL_SLOTS = "maximum_total_slots"
+	CONCURRENT_FRAMES = "concurrent_frames"
+	CONCURRENT_SLOTS = "concurrent_slots"
+	CONCURRENT_TOTAL_SLOTS = "concurrent_total_slots"
+	SLOT_CAPACITY = "slot_capacity"
+	FRAME_CAPACITY = "frame_capacity"

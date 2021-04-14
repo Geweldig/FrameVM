@@ -1,0 +1,77 @@
+module Common
+
+lexical sorts
+  ID INT STRING
+  NEWLINE_EOF EOF
+
+lexical syntax
+
+  ID               = [a-zA-Z] [a-zA-Z0-9]*
+  INT              = "-"? [0-9]+
+  LAYOUT           = [\ \t\n\r]
+  LAYOUT           = ";" ~[\n\r]* NEWLINE_EOF
+  NEWLINE_EOF      = [\n\r]
+  NEWLINE_EOF      = EOF
+  EOF              =
+
+  ID   = "else"              {reject}
+  ID   = "=>"                {reject}
+  ID   = "define"            {reject}
+  ID   = "unquote"           {reject}
+  ID   = "unquote-splicing"  {reject}
+  ID   = "quote"             {reject}
+  ID   = "lambda"            {reject}
+  ID   = "if"                {reject}
+  ID   = "raise"             {reject}
+  ID   = "begin"             {reject}
+  ID   = "writeln"           {reject}
+  ID   = "set!"              {reject}
+  ID   = "set-car!"          {reject}
+  ID   = "set-cdr!"          {reject}
+  ID   = "begin"             {reject}
+  ID   = "cond"              {reject}
+  ID   = "and"               {reject}
+  ID   = "or"                {reject}
+  ID   = "cons"              {reject}
+  ID   = "case"              {reject}
+  ID   = "let"               {reject}
+  ID   = "let*"              {reject}
+  ID   = "letrec"            {reject}
+  ID   = "do"                {reject}
+  ID   = "delay"             {reject}
+  ID   = "quasiquote"        {reject}
+  ID   = "call-with-current-continuation" {reject}
+  ID   = "with-handlers"     {reject}
+
+  ID   = "abs"               {reject}
+  ID   = "sqrt"              {reject}
+  ID   = "not"               {reject}
+  ID   = "length"            {reject}
+  ID   = "car"               {reject}
+  ID   = "cdr"               {reject}
+  ID   = "number?"           {reject}
+  ID   = "integer?"          {reject}
+  ID   = "pair?"             {reject}
+  ID   = "symbol?"           {reject}
+  ID   = "boolean?"          {reject}
+  ID   = "string?"           {reject}
+  ID   = "null?"             {reject}
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+
+  INT             -/- [0-9]
+  ID              -/- [0-9a-zA-Z\!\$\%\&\*\/\:\<\=\>\?\^\_\~\+\-\.\@]
+
+  // EOF may not be followed by any char
+
+  EOF             -/- ~[]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]

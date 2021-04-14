@@ -1,0 +1,12 @@
+(let ((fibonacci #f))
+  (let ((irrelevant #f))
+    (let ((alsoirrelevant #f))
+      (set! fibonacci
+        (lambda (x)
+          (if (> 1 x)
+            0
+            (if (> 2 x)
+              1
+              (let ((something #f))
+                (+ (fibonacci (+ x -1)) (fibonacci (+ x -2))))))))
+      (fibonacci 10))))

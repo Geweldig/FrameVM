@@ -1,0 +1,94 @@
+module expressions
+
+imports
+    signatures/Framed-sig
+    interpreter/helpers
+    interpreter/memory
+
+rules
+	eval-exp: (BinOp(e1, op, e2), self, program) -> result
+		with
+			v1 := <eval-base> (e1, self, program)
+			; v2 := <eval-base> (e2, self, program)
+			; result := <apply-op> (op, v1, v2)
+
+	apply-op: (Plus(), v1, v2) -> <addi> (v1, v2)
+	apply-op: (Div(), v1, v2) -> <divi> (v1, v2)
+	apply-op: (Mul(), v1, v2) -> <muli> (v1, v2)
+	apply-op: (Sub(), v1, v2) -> <subti> (v1, v2)
+	apply-op: (Eq(), v1, v2) -> <check-equals> (v1, v2)
+	apply-op: (Conc(), v1, v2) -> <strcat> (<to-string> v1, <to-string> v2)
+	apply-op: (And(), v1, v2) -> 1
+		where
+			not(<?0> v1)
+			; not(<?0> v2)
+	apply-op: (And(), _, _) -> 0
+	apply-op: (Or(), v1, v2) -> 1
+		where
+			(not(<?0> v1) + not(<?0> v2))
+	apply-op: (Or(), _, _) -> 0
+	apply-op: (Lt(), v1, v2) -> 1
+		where
+			<is-int> v1
+			; <is-int> v2
+			; <lt> (v1, v2)
+	apply-op: (Lt(), _, _) -> 0
+
+	eval-exp: (Not(e), self, program) -> 1
+		where
+			v := <eval-base> (e, self, program)
+			; <?0> v
+	eval-exp: (Not(_), _, _) -> 0
+
+	eval-exp: (Frame(frame), self, program) -> result
+		with
+			result := <build-frame(|self, program)> frame
+
+	eval-exp: (Base(b), self, program) -> v
+		with
+			v := <eval-base> (b, self, program)
+
+	eval-base: (Int(i), _, _) -> <string-to-int> i
+	eval-base: (String(s), _, _) -> <unescape> <un-double-quote> s
+	eval-base: (Path(p), self, program) -> <unwrap-path; do-fetch(|self, program)> p
+	eval-base: (c@CodePointer(_), _, _) -> c
+	eval-base: (h@Hashtable(_), _, _) -> h
+
+	build-frame = build-frame(|None(), None(), [])
+	build-frame(|self, program) = build-frame(|self, program, [])
+	build-frame(|self, program, data): FrameDecl(slots) -> result
+		with
+			result := <map(slot-to-tuple); init-frame(|<conc> (data, [self, program])); prepare-frames(|[], self, program, data)> slots
+
+	slot-to-tuple: Slot(name, exp) -> (name, exp)
+
+	prepare-frames(|insertPath, self, program, data): h@Hashtable(_) -> h
+		with
+			<deb(|"Preparing frames:")> h
+			; keys := <frame-keys> h
+			; <deb(|"Keys to map over:")> keys
+			; <foldr(!data, prepare-hashitem(|h, insertPath, self, program))> keys
+
+	prepare-hashitem(|preparing, insertPath, self, program): (key, data) -> <conc> (data, vs)
+		with
+			newPath := <conc> (insertPath, [key])
+			; <deb(|"New path to run for:")> newPath
+			; contains := <fetch(|preparing)> newPath
+			; <deb(|"Found at path:")> contains
+			; vs := <eval-hashitem(|preparing, newPath, self, program, data)> contains
+
+	eval-hashitem(|preparing, insertPath, self, program, data): h@Hashtable(_) -> vs
+		with
+			vs := <prepare-frames(|insertPath, self, program, <conc> (data, [h, preparing, self, program]))> h
+
+	eval-hashitem(|preparing, insertPath, self, program, data): Frame(frame) -> [v]
+		with
+			<deb(|"Frame to eval:")> frame
+			; v := <build-frame(|self, program, <conc> (data, [preparing]))> frame
+			; <put(|insertPath, v, <conc> (data, [self, program, preparing, v]))> preparing
+
+	eval-hashitem(|preparing, insertPath, self, program, data): item -> [v]
+		with
+			<deb(|"Item to eval:")> item
+			; v := <eval-exp> (item, self, program)
+			; <put(|insertPath, v, <conc> (data, [self, program, preparing, v]))> preparing

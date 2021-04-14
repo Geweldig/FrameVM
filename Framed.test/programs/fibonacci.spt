@@ -1,0 +1,1681 @@
+module fibonacci
+
+language Framed
+
+test fibonacci -1 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := -1;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "0
+"
+
+test fibonacci -1 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := -1,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "0
+"
+
+test fibonacci 0 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 0;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "0
+"
+
+test fibonacci 0 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 0,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "0
+"
+
+test fibonacci 1 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 1;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "1
+"
+
+test fibonacci 1 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 1,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "1
+"
+
+test fibonacci 2 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 2;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "1
+"
+
+test fibonacci 2 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 2,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "1
+"
+
+test fibonacci 3 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 3;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "2
+"
+
+test fibonacci 3 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 3,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "2
+"
+
+test fibonacci 4 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 4;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "3
+"
+
+test fibonacci 4 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 4,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "3
+"
+
+test fibonacci 5 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 5;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "5
+"
+
+test fibonacci 5 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 5,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "5
+"
+
+test fibonacci 6 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 6;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "8
+"
+
+test fibonacci 6 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 6,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "8
+"
+
+test fibonacci 7 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 7;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "13
+"
+
+test fibonacci 7 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 7,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "13
+"
+
+test fibonacci 8 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 8;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "21
+"
+
+test fibonacci 8 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 8,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "21
+"
+
+test fibonacci 9 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 9;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "34
+"
+
+test fibonacci 9 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 9,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "34
+"
+
+test fibonacci 10 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.end;
+				self.newFrame.caller := self;
+				self.newFrame.arg1 := 10;
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 1;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [];
+				self.intermediates.check := self.arg1 < 3;
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibOne;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [];
+				self.newFrame.return := ^.afterFibTwo;
+				self.newFrame.caller := self;
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "55
+"
+
+test fibonacci 10 [[
+	frame: [
+		Main := frame: [
+			start := code {
+				self.newFrame := frame: [
+					return := ^.end,
+					caller := self,
+					arg1 := 10,
+				];
+				jump ^.^.Fibonacci.start self.newFrame;
+			},
+			end := code {
+				self.result := self.newFrame.returnValue;
+				show self.result;
+			},
+		],
+		Fibonacci := frame: [
+			start := code {
+				//if arg1 <= 0
+				self.intermediates := frame: [
+					check := self.arg1 < 1,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnZero self;
+
+				//if arg1 <= 2
+				self.intermediates := frame: [
+					check := self.arg1 < 3,
+				];
+				self.intermediates.check := !self.intermediates.check;
+				ifeq self.intermediates.check ^.returnOne self;
+
+				//Perform two recursive calls
+				self.newFrame := frame: [
+					return := ^.afterFibOne,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 1;
+				jump ^.start self.newFrame;
+			},
+			returnZero := code {
+				self.returnValue := 0;
+				jump self.return self.caller;
+			},
+			returnOne := code {
+				self.returnValue := 1;
+				jump self.return self.caller;
+			},
+			afterFibOne := code {
+				self.returnValue := self.newFrame.returnValue;
+
+				self.newFrame := frame: [
+					return := ^.afterFibTwo,
+					caller := self,
+				];
+
+				self.newFrame.arg1 := self.arg1 - 2;
+				jump ^.start self.newFrame;
+			},
+			afterFibTwo := code {
+				self.returnValue := self.newFrame.returnValue + self.returnValue;
+				jump self.return self.caller;
+			},
+		],
+	]
+]] run eval-framed to "55
+"
+
+test compiled [[
+frame: [
+  lbl_lambda_0 := frame: [
+    lbl_if_done_0 := code {
+      self.caller.callee_result := self.lbl_if_result_0;
+      jump self.return self.caller;
+    },
+    lbl_if_done_1 := code {
+      self.lbl_if_result_0 := self.lbl_if_result_1;
+      jump ^.lbl_if_done_0 self;
+    },
+    lbl_return_1 := code {
+      self.intermediate_5 := self.callee_result;
+      self.intermediate_6 := self.intermediate_3 + self.intermediate_5;
+      self.lbl_if_result_1 := self.intermediate_6;
+      jump ^.lbl_if_done_1 self;
+    },
+    lbl_return_0 := code {
+      self.intermediate_3 := self.callee_result;
+      self.intermediate_4 := self.var_x + -2;
+      self := frame: [
+        return := ^.lbl_return_1,
+        caller := self,
+        arg1 := self.intermediate_4,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_if_false_1 := code {
+      self.intermediate_2 := self.var_x + -1;
+      self := frame: [
+        return := ^.lbl_return_0,
+        caller := self,
+        arg1 := self.intermediate_2,
+        parent := self.parent.var_fibonacci.parent,
+      ];
+      jump self.caller.parent.var_fibonacci.function self;
+    },
+    lbl_if_false_0 := code {
+      self.intermediate_1 := self.var_x < 2;
+      ifeq self.intermediate_1 ^.lbl_if_false_1 self;
+      self.lbl_if_result_1 := 1;
+      jump ^.lbl_if_done_1 self;
+    },
+    start := code {
+      self.var_x := self.arg1;
+      self.intermediate_0 := self.var_x < 1;
+      ifeq self.intermediate_0 ^.lbl_if_false_0 self;
+      self.lbl_if_result_0 := 0;
+      jump ^.lbl_if_done_0 self;
+    },
+  ],
+  Main := frame: [
+    lbl_return_2 := code {
+      self.intermediate_8 := self.callee_result;
+      self.parent.intermediate_9 := self.intermediate_8;
+      self := self.parent;
+      show self.intermediate_9;
+    },
+    start := code {
+      self := frame: [
+        parent := self,
+        var_fibonacci := 0,
+      ];
+      self.intermediate_7 := frame: [
+        function := ^.^.lbl_lambda_0.start,
+        parent := self,
+      ];
+      self.var_fibonacci := self.intermediate_7;
+      self := frame: [
+        return := ^.lbl_return_2,
+        caller := self,
+        arg1 := 5,
+        parent := self.var_fibonacci.parent,
+      ];
+      jump self.caller.var_fibonacci.function self;
+    },
+  ],
+]
+]] run eval-framed to "5
+"

@@ -1,0 +1,1365 @@
+module racket_validation
+
+language TinyRacket
+
+test 42_01.trt [[
+42
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test and_01.trt [[
+(and #t #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test and_02.trt [[
+(and #t #f)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test and_03.trt [[
+(and #f #t)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test and_04.trt [[
+(and #f #f)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test and_05.trt [[
+(and (> 1337 42) #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test and_06.trt [[
+(and (> 1337 42) #f)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test and_07.trt [[
+(and #f (begin (writeln 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test and_08.trt [[
+(and #t (begin (writeln 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "42
+1
+"
+
+test call-cc_01.trt [[
+(call-with-current-continuation (lambda (x) 42))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test call-cc_02.trt [[
+(call-with-current-continuation (lambda (x) (x 1337)))
+]]
+analysis succeeds
+run compile-and-run to "1337
+"
+
+test call-cc_03.trt [[
+(+ 21 (call-with-current-continuation (lambda (x) 21)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test call-cc_04.trt [[
+(+ 21 (call-with-current-continuation (lambda (x) (x 21))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test call-cc_05.trt [[
+(+ 1 (call-with-current-continuation (lambda (k) (+ 2 (k 3)))))
+]]
+analysis succeeds
+run compile-and-run to "4
+"
+
+test call-cc_06.trt [[
+(+ 1 (call-with-current-continuation (lambda (k) (+ 2 3))))
+]]
+analysis succeeds
+run compile-and-run to "6
+"
+
+test call-cc_07.trt [[
+(let ((k #f))
+  (let ((i 0))
+    (call-with-current-continuation (lambda (x) (set! k x)))
+    (set! i (+ i 1))
+    (if (> i 3) i (k -1))))
+]]
+analysis succeeds
+run compile-and-run to "4
+"
+
+test call-cc_08.trt [[
+(with-handlers
+ (((lambda (x) #t) (lambda (kExc) kExc)))
+ (let ((k #f))
+   (let ((i 0))
+     (call-with-current-continuation (lambda (x) (set! k x)))
+     (set! i (+ i 1))
+     (if (> i 3) (raise i) (k -1)))))
+]]
+analysis succeeds
+run compile-and-run to "4
+"
+
+test call-cc_09.trt [[
+(with-handlers
+ (((lambda (x) #t) (lambda (kExc) kExc)))
+ (let ((k #f))
+   (let ((i 0))
+     (call-with-current-continuation (lambda (x) (set! k x)))
+     (set! i (+ i 1))
+     (if (> i 3) i (k (raise -1))))))
+]]
+analysis succeeds
+run compile-and-run to "-1
+"
+
+test call-cc_10.trt [[
+(let ((x 0)) (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3))))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test call-cc_11.trt [[
+(let ((x 0))
+  (let ((done #f))
+    (let ((result #f))
+      (set! result
+        (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3))))
+      (if (not done) (begin (set! done #t) (x 4)) result))))
+]]
+analysis succeeds
+run compile-and-run to "6
+"
+
+test call-cc_12.trt [[
+(let ((x 0))
+  (let ((done #f))
+    (let ((result
+           (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+      (if (not done) (begin (set! done #t) (x 4)) result))))
+]]
+analysis succeeds
+run compile-and-run to "6
+"
+
+test call-cc_13.trt [[
+(let ((x 0))
+  (let ((done #f))
+    (let ((result
+           (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+      (if (not done) result result))))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test call-cc_14.trt [[
+(let ((x 5))
+  (let ((count x))
+    (let ((fac #f))
+      (set! x
+        (* x (call-with-current-continuation (lambda (k) (set! fac k) 1))))
+      (if (equal? count 1) x (begin (set! count (+ count -1)) (fac count))))))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test call-cc_15.trt [[
+(let ((x 5))
+  (let ((count x))
+    (let ((fac #f))
+      (set! x
+        (* x (call-with-current-continuation (lambda (k) (set! fac k) 1))))
+      (if (equal? count 1)
+        x
+        (begin (set! count (+ count -1)) (writeln x) (fac count))))))
+]]
+analysis succeeds
+run compile-and-run to "5
+20
+15
+10
+5
+"
+
+test call-cc_16.trt [[
+(let ((x 5))
+  (let ((count x))
+    (let ((fac #f))
+      (set! x
+        (* (call-with-current-continuation (lambda (k) (set! fac k) 1)) x))
+      (if (equal? count 1) x (begin (set! count (+ count -1)) (fac count))))))
+]]
+analysis succeeds
+run compile-and-run to "120
+"
+
+test call-cc_17.trt [[
+(let ((fac #f))
+  (let ((x 5))
+    (let ((count x))
+      (let ((callcclambda (lambda (k) (set! fac k) 1)))
+        (set! x (* x (call-with-current-continuation callcclambda)))
+        (if (equal? count 1)
+          x
+          (begin (set! count (+ count -1)) (fac count)))))))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test call-cc_18.trt [[
+(with-handlers
+ (((lambda (x) #t) (lambda (kExc) kExc)))
+ (let ((k #f))
+   (let ((i 0))
+     (call-with-current-continuation (lambda (x) (set! k x)))
+     (set! i (+ i 1))
+     (if (> i 3) (begin (writeln 42) (writeln 1337) (raise i)) (k -1)))))
+]]
+analysis succeeds
+run compile-and-run to "42
+1337
+4
+"
+
+test call-cc_19.trt [[
+(let ((fac #f))
+  (let ((x 5))
+    (let ((count x))
+      (let ((callcclambda (lambda (k) (set! fac k) 1)))
+        (set! x (* x (call-with-current-continuation callcclambda)))
+        (if (equal? count 1) x ((set! count (+ count -1)) (fac count)))))))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test call-cc_20.trt [[
+(letrec ((x 0)
+         (done #f)
+         (result
+          (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+  (if (not done) (begin (set! done #t) (x 4)) result))
+]]
+analysis succeeds
+run compile-and-run to "6
+"
+
+test call-cc_21.trt [[
+(call-with-current-continuation (lambda (k) (* 2 (k 42))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test eq_01.trt [[
+(equal? 42 42)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test eq_02.trt [[
+(equal? 42 (* 2 21))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test eq_03.trt [[
+(equal? 42 1337)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test eq_04.trt [[
+(equal? #t (> 1337 42))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test false_01.trt [[
+#f
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test gt_01.trt [[
+(> 42 1337)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test gt_02.trt [[
+(> 1337 42)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test gt_03.trt [[
+(> 42 42)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test gt_04.trt [[
+(> (* 2 21) 41)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test handlers_01.trt [[
+(raise 42)
+]]
+analysis succeeds
+run compile-and-run to "uncaught exception: 42
+"
+
+test handlers_02.trt [[
+(raise (raise 42))
+]]
+analysis succeeds
+run compile-and-run to "uncaught exception: 42
+"
+
+test handlers_03.trt [[
+(with-handlers (((lambda (x) #t) (lambda (x) x))) (raise 42))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_04.trt [[
+(let ((handler (lambda (x) x)))
+  (with-handlers (((lambda (x) #t) handler)) (raise 42)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_05.trt [[
+(with-handlers
+ (((lambda (x) #t) (lambda (x) (+ x 3))))
+ (raise (with-handlers (((lambda (x) #t) (lambda (x) (+ x 32)))) (raise 7))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_06.trt [[
+(let ((catchesException #f))
+  (set! catchesException (lambda (x) (+ x x)))
+  (with-handlers (((lambda (x) #t) catchesException)) (raise 21)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_07.trt [[
+(let ((catchesException (lambda (x) (+ x x))))
+  (with-handlers (((lambda (x) #t) catchesException)) (raise 21)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_08.trt [[
+(letrec ((catchesException (lambda (x) (+ x x))))
+  (with-handlers (((lambda (x) #t) catchesException)) (raise 21)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_09.trt [[
+(let ((raisesException #f))
+  (set! raisesException (lambda (x) (raise x)))
+  (with-handlers (((lambda (x) #t) (lambda (x) x))) (raisesException 42)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_10.trt [[
+(let ((raisesException (lambda (x) (raise x))))
+  (with-handlers (((lambda (x) #t) (lambda (x) x))) (raisesException 42)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_11.trt [[
+(letrec ((raisesException (lambda (x) (raise x))))
+  (with-handlers (((lambda (x) #t) (lambda (x) x))) (raisesException 42)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_12.trt [[
+(with-handlers (((lambda (x) #t) (lambda (x) (* 2 x)))) (raise (raise 21)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_13.trt [[
+(with-handlers
+ (((lambda (x) #t) (lambda (x) x)))
+ (letrec ((fibonacci
+           (lambda (x)
+             (if (> 0 x)
+               (raise 42)
+               (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+   (fibonacci 6)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_14.trt [[
+(+ (with-handlers (((lambda (x) #t) (lambda (x) 1337))) 10) 32)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_15.trt [[
+(+ (with-handlers (((lambda (x) #t) (lambda (x) 10))) (raise 1337)) 32)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_16.trt [[
+(+ (with-handlers (((lambda (x) #t) (lambda (x) (* 2 x)))) (raise 5)) 32)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test handlers_17.trt [[
+(+ (with-handlers (((lambda (x) #t) (lambda (x) 1337))) 10) (raise 32))
+]]
+analysis succeeds
+run compile-and-run to "uncaught exception: 32
+"
+
+test if_01.trt [[
+(if #t 42 1337)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test if_02.trt [[
+(if (or #f #t)
+  (let ((a (+ 5 2))) (set! a (* a 3)) (set! a (* a 2)) a)
+  (let ((b (+ 30 7))) (+ 1300 b)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test if_03.trt [[
+(if (or #f #f)
+  (let ((a (+ 5 2))) (set! a (* a 3)) (set! a (* a 2)) a)
+  (let ((b (+ 30 7))) (+ 1300 b)))
+]]
+analysis succeeds
+run compile-and-run to "1337
+"
+
+test if_04.trt [[
+(if (or #f #t)
+  (let ((b (+ 30 7))) (+ 1300 b))
+  (let ((a (+ 5 2))) (set! a (* a 3)) (set! a (* a 2)) a))
+]]
+analysis succeeds
+run compile-and-run to "1337
+"
+
+test if_05.trt [[
+(if (or #f #f)
+  (let ((b (+ 30 7))) (+ 1300 b))
+  (let ((a (+ 5 2))) (set! a (* a 3)) (set! a (* a 2)) a))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_01.trt [[
+((lambda (x) (+ x x)) 21)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_02.trt [[
+(let ((twentyone 21)) ((lambda (two) (* two twentyone)) 2))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_03.trt [[
+(let ((twentyone 21))
+  ((lambda (ignored)
+     (let ((two 2)) ((lambda (ignored) (* two twentyone)) 1337)))
+   1337))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_04.trt [[
+((lambda (x) x) #f)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test lambda_05.trt [[
+((lambda (x) (* x x)) 21)
+]]
+analysis succeeds
+run compile-and-run to "441
+"
+
+test lambda_06.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci -1))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test lambda_07.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 0))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test lambda_08.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 1))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test lambda_09.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 2))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test lambda_10.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 3))
+]]
+analysis succeeds
+run compile-and-run to "2
+"
+
+test lambda_11.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 4))
+]]
+analysis succeeds
+run compile-and-run to "3
+"
+
+test lambda_12.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 5))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_13.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 6))
+]]
+analysis succeeds
+run compile-and-run to "8
+"
+
+test lambda_14.trt [[
+(letrec ((fibonacci
+          (lambda (x)
+            (if (> 1 x)
+              0
+              (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2))))))))
+  (fibonacci 6))
+]]
+analysis succeeds
+run compile-and-run to "8
+"
+
+test lambda_15.trt [[
+(letrec ((fibonacci
+          (lambda (x)
+            (if (> 1 x)
+              0
+              (if (> 2 x)
+                1
+                (let ((irrelevant #f))
+                  (let ((irrelevant2 #f))
+                    (+ (fibonacci (+ x -1)) (fibonacci (+ x -2))))))))))
+  (fibonacci 10))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_16.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 7))
+]]
+analysis succeeds
+run compile-and-run to "13
+"
+
+test lambda_17.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 8))
+]]
+analysis succeeds
+run compile-and-run to "21
+"
+
+test lambda_18.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 9))
+]]
+analysis succeeds
+run compile-and-run to "34
+"
+
+test lambda_19.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (fibonacci 10))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_20.trt [[
+(let ((fibonacci #f))
+  (let ((irrelevant #f))
+    (set! fibonacci
+      (lambda (x)
+        (if (> 1 x)
+          0
+          (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+    (fibonacci 10)))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_21.trt [[
+(let ((fibonacci #f))
+  (let ((irrelevant #f))
+    (let ((irrelevant2 #f))
+      (set! fibonacci
+        (lambda (x)
+          (if (> 1 x)
+            0
+            (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+      (fibonacci 10))))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_22.trt [[
+(let ((fibonacci #f))
+  (let ((irrelevant #f))
+    (let ((alsoirrelevant #f))
+      (set! fibonacci
+        (lambda (x)
+          (if (> 1 x)
+            0
+            (if (> 2 x)
+              1
+              (let ((something #f))
+                (+ (fibonacci (+ x -1)) (fibonacci (+ x -2))))))))
+      (fibonacci 10))))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_23.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x)
+          1
+          (let ((irrelevant #f))
+            (+ (fibonacci (+ x -1)) (fibonacci (+ x -2))))))))
+  (fibonacci 10))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_24.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x)
+          1
+          (let ((irrelevant #f))
+            (let ((irrelevant2 #f))
+              (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))))
+  (fibonacci 10))
+]]
+analysis succeeds
+run compile-and-run to "55
+"
+
+test lambda_25.trt [[
+(let ((x ((lambda (x) (+ x x)) 21))) x)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_26.trt [[
+(let ((x (lambda (x) (+ x x)))) (x 21))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_27.trt [[
+(let ((x (lambda (x) (+ x x)))) (let ((a x)) (let ((b #f)) (x 21))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_28.trt [[
+(let ((x (lambda (x) (+ x x)))) (let ((a x)) (let ((b #f)) (a 21))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_29.trt [[
+(let ((x (lambda (x) (+ x x)))) (let ((b 21)) (let ((a x)) (a b))))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test lambda_30.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (let ((fibmirror fibonacci)) (fibonacci 5)))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_31.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (let ((x 5)) (fibonacci x)))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_32.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (let ((fibmirror fibonacci)) (fibmirror 5)))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_33.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  ((lambda (x) (x 5)) fibonacci))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_34.trt [[
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (let ((check1 (> 1 x)))
+        (let ((result1
+               (if check1
+                 0
+                 (let ((result2
+                        (let ((check2 (> 2 x)))
+                          (if check2
+                            1
+                            (let ((call1 (+ x -1)))
+                              (let ((call1result (fibonacci call1)))
+                                (let ((call2 (+ x -2)))
+                                  (let ((call2result (fibonacci call2)))
+                                    (let ((plusresult
+                                           (+ call1result call2result)))
+                                      plusresult)))))))))
+                   result2))))
+          result1))))
+  (fibonacci 5))
+]]
+analysis succeeds
+run compile-and-run to "5
+"
+
+test lambda_35.trt [[
+((let ((x 1)) (let ((f (lambda (y) (+ x y)))) f)) 2)
+]]
+analysis succeeds
+run compile-and-run to "3
+"
+
+test lambda_36.trt [[
+(let ((x 11)) ((lambda (y) (+ x y)) 31))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_01.trt [[
+(let ((x #f)) #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test let_02.trt [[
+(let ((x #f)) x)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test let_03.trt [[
+(let ((x (> 1337 42))) x)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test let_04.trt [[
+(let ((x (> 1337 42))) (let ((y #f)) y))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test let_05.trt [[
+(let ((x (> 1337 42))) (let ((y #f)) (and x y)))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test let_06.trt [[
+(let ((x (> 1337 42))) (let ((y #f)) (or x y)))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test let_07.trt [[
+(let ((x 1337)) (set! x 42) x)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_08.trt [[
+(let ((x 42)) (let ((x 1337)) (set! x 314)) x)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_09.trt [[
+(let ((x 42)) (let ((unimportant 1337)) (set! x 314)) x)
+]]
+analysis succeeds
+run compile-and-run to "314
+"
+
+test let_10.trt [[
+(let ((x 21) (y 2)) (* x y))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_11.trt [[
+(let ((x 10) (y 2) (z 30)) (+ x (+ y z)))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_12.trt [[
+(let ((x (* 3 7)) (y 2)) (* x y))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_13.trt [[
+(let ((x (* 3 7)) (y (* 7 3))) (+ x y))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test let_14.trt [[
+(let ((x (* (* 3 7) 2))) (if (equal? x 42) x 0))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test letrec_01.trt [[
+(letrec ((x 1) (y 1)) (+ x y))
+]]
+analysis succeeds
+run compile-and-run to "2
+"
+
+test letrec_02.trt [[
+(letrec ((x 1) (y x)) (+ x y))
+]]
+analysis succeeds
+run compile-and-run to "2
+"
+
+test letrec_03.trt [[
+(letrec ((x (* 3 7)) (y x)) (+ x y))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test letrec_04.trt [[
+(letrec ((isEven (lambda (n) (or (equal? n 0) (isOdd (+ n -1)))))
+         (isOdd (lambda (n) (and (not (equal? n 0)) (isEven (+ n -1))))))
+  (isOdd 11))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test mul_01.trt [[
+(* 21 2)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test mul_02.trt [[
+(* (* 7 3) 2)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test not_01.trt [[
+(not #t)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_02.trt [[
+(not #f)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_03.trt [[
+(not (> 42 1337))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_04.trt [[
+(not (> 1337 42))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_05.trt [[
+(not (> 42 42))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_06.trt [[
+(not (> (* 2 21) 41))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_07.trt [[
+(not (equal? 42 42))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_08.trt [[
+(not (equal? 42 (* 2 21)))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_09.trt [[
+(not (equal? 42 1337))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_10.trt [[
+(not (equal? #t (> 1337 42)))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_11.trt [[
+(not (and #t #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_12.trt [[
+(not (and #t #f))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_13.trt [[
+(not (and #f #t))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_14.trt [[
+(not (and #f #f))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_15.trt [[
+(not (and (> 1337 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_16.trt [[
+(not (and (> 1337 42) #f))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_17.trt [[
+(not (or #t #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_18.trt [[
+(not (or #t #f))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_19.trt [[
+(not (or #f #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_20.trt [[
+(not (or #f #f))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test not_21.trt [[
+(not (or (> 1337 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test not_22.trt [[
+(not (or (> 1337 42) #f))
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test or_01.trt [[
+(or #t #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test or_02.trt [[
+(or #t #f)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test or_03.trt [[
+(or #f #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test or_04.trt [[
+(or #f #f)
+]]
+analysis succeeds
+run compile-and-run to "0
+"
+
+test or_05.trt [[
+(or (> 1337 42) #t)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test or_06.trt [[
+(or (> 1337 42) #f)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test or_07.trt [[
+(or #f (begin (writeln 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "42
+1
+"
+
+test or_08.trt [[
+(or #t (begin (writeln 42) #t))
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test plus_01.trt [[
+(+ 20 22)
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test plus_02.trt [[
+(+ 20 (+ 3 19))
+]]
+analysis succeeds
+run compile-and-run to "42
+"
+
+test seq_01.trt [[
+(begin 1 2)
+]]
+analysis succeeds
+run compile-and-run to "2
+"
+
+test true_01.trt [[
+#t
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test writeln_01.trt [[
+(writeln 1)
+]]
+analysis succeeds
+run compile-and-run to "1
+"
+
+test writeln_02.trt [[
+(writeln (writeln 1))
+]]
+analysis succeeds
+run compile-and-run to "1
+#<void>
+"
+
+test writeln_03.trt [[
+(begin (writeln 1) (writeln 1))
+]]
+analysis succeeds
+run compile-and-run to "1
+1
+"

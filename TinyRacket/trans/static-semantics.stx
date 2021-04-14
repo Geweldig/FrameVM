@@ -1,0 +1,129 @@
+module static-semantics
+
+signature
+
+  sorts
+    Exp
+    Bool
+    Bind
+    ID = string
+    INT = string
+    STRING = string
+    Op = string
+
+  namespaces
+  	Var: ID
+
+  constructors
+    BinOp : Op * Exp * Exp -> Exp
+    If : Exp * Exp * Exp -> Exp
+    Not : Exp -> Exp
+    Block : Exp -> Exp
+    Let : list(Bind) * Exp -> Exp
+    LetRec : list(Bind) * Exp -> Exp
+    Raise : Exp -> Exp
+    WithHandlers : Exp * Exp -> Exp
+    BoolE : Bool -> Exp
+    IntE : INT -> Exp
+    CallCC : Exp -> Exp
+    Call : Exp * Exp -> Exp
+    Var : ID -> Exp
+    Seq : Exp * Exp -> Exp
+    Assign : ID * Exp -> Exp
+    Lambda : ID * Exp -> Exp
+    Show : Exp -> Exp
+    True : Bool
+    False : Bool
+    Bind : ID * Exp -> Bind
+
+  name-resolution
+    labels P
+    resolve Var filter P* min $ < P
+
+rules // single-file entry point
+  programOk: Exp
+  programOk(Seq(_, _)) :-
+  	false.
+  programOk(e) :- {globalScope}
+  	new globalScope,
+  	expOk(globalScope, e).
+
+  expOk : scope * Exp
+
+  expOk(s, BinOp(_, e1, e2)) :-
+  	expOk(s, e1),
+  	expOk(s, e2).
+
+  expOk(s, If(c, e1, e2)) :-
+  	expOk(s, c),
+  	expOk(s, e1),
+  	expOk(s, e2).
+
+  expOk(s, Not(e)) :-
+  	expOk(s, e).
+
+  expOk(s, Let(binds, b)) :- {bodyScope}
+  	new bodyScope,
+  	bodyScope -P-> s,
+  	bindsOk(s, bodyScope, binds),
+  	expOk(bodyScope, b).
+
+  expOk(s, LetRec(binds, b)) :- {bodyScope}
+  	new bodyScope,
+  	bodyScope -P-> s,
+  	bindsOk(bodyScope, bodyScope, binds),
+  	expOk(bodyScope, b).
+
+  bindsOk maps bindOk(*, *, list(*))
+
+  bindOk: scope * scope * Bind
+  bindOk(resolveScope, bodyScope, Bind(n, e)) :-
+  	expOk(resolveScope, e),
+  	Var{n@-} in bodyScope |-> [(_, _)] | error $[Duplicate identifier in: [n]] @n,
+  	bodyScope -> Var{n@n}.
+
+  expOk(s, Raise(e)) :-
+  	expOk(s, e).
+
+  expOk(s, Show(e)) :-
+  	expOk(s, e).
+
+  expOk(s, Block(e)) :-
+    expOk(s, e).
+
+  expOk(s, c@WithHandlers(e1, e2)) :- {tryScope}
+  	expOk(s, e1),
+
+  	new tryScope,
+  	tryScope -P-> s,
+  	expOk(tryScope, e2).
+
+  expOk(s, BoolE(_)).
+  expOk(s, IntE(_)).
+  expOk(s, CallCC(e)) :-
+  	expOk(s, e).
+
+  expOk(s, Call(e1, e2)) :-
+  	expOk(s, e1),
+  	expOk(s, e2).
+
+  expOk(s, Var(n)) :- {n' p}
+  	Var{n@-} in s |-> [(p, (Var{n'@_}))] | error $[Unbound identifier in: [n]] @n,
+  	@n.ref := n',
+  	@n.path := p.
+
+  expOk(s, Seq(e1, e2)) :-
+  	expOk(s, e1),
+  	expOk(s, e2).
+
+  expOk(s, Assign(n, v)) :- {n' p}
+  	Var{n@-} in s |-> [(p, (Var{n'@_}))],
+  	@n.ref := n',
+  	@n.path := p,
+  	expOk(s, v).
+
+  expOk(s, Lambda(n, b)) :- {lambdaScope}
+  	new lambdaScope,
+  	lambdaScope -P-> s,
+  	lambdaScope -> Var{n@n},
+  	expOk(lambdaScope, b).

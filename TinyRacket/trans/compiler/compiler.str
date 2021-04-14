@@ -1,0 +1,33 @@
+module compiler
+
+imports
+  compiler/expressions
+  compiler/lib/debug
+  interpreter/interpreter
+  pp
+  pp/Framed-parenthesize
+  pp/Framed-pp
+  signatures/TinyRacket-sig
+
+rules
+  compile: program -> <scope-local-new(<compile-exps> program)>
+
+  compile-and-run-deb: program -> <__compile-and-run> program
+    with
+      <set-config> ("debug", 1)
+  compile-and-run = __compile-and-run
+
+  __compile-and-run: program -> result
+    with
+      <deb(|"[Compile and run] Starting compilation: ")> program
+      ; compiled := <compile> program
+      ; <deb(|"[Compile and run] Program prettyprints: ")> <pp-Framed-string> compiled
+      ; <deb(|"[Compile and run] Starting evaluation: ")> compiled
+      ; result := <__eval-framed> compiled
+
+rules
+  pp-Framed-string =
+    parenthesize-Framed
+    ; prettyprint-Framed-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)

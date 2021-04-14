@@ -1,0 +1,31 @@
+module desugar
+
+imports
+	signatures/Framed-sig
+	interpreter/helpers
+
+rules
+	desugar-all: ast -> result
+		with
+			desugared := <topdown(try(desugar))> ast
+			; result := <fix-up(|[], "false")> desugared
+
+	desugar: FrameEmpty() -> FrameDecl([])
+	desugar: CodeEmpty() -> CodePointer([])
+
+	fix-up(|curr_path, _): CodePointer(c) -> CodePointer(<fix-up(|curr_path, "true")> c)
+	fix-up(|curr_path, in_code): Slot(name, Frame(FrameDecl(contents))) ->
+		Slot(name, Frame(FrameDecl(<fix-up(|<cond-conc(|in_code)> (curr_path, [name]), in_code)> contents)))
+
+	fix-up(|curr_path, _): PathUp(p) -> path
+		with
+			(path, _) := <split-at(|<subti> (<length> curr_path, <length; dec> p))> curr_path
+
+	fix-up(|curr_path, in_code): ast -> desugared
+		with
+			(term, elems) := <explode-term> ast
+			; desugared_elems := <map(fix-up(|curr_path, in_code))> elems
+			; desugared := <mkterm> (term, desugared_elems)
+
+	cond-conc(|"true") = Fst
+	cond-conc(|"false") = conc

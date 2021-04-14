@@ -1,0 +1,27 @@
+module slotter
+
+imports
+  signatures/Framed-sig
+
+signature
+  constructors
+    CodeSlotStart: String -> CodeSlotStart
+
+rules
+  from-flat: [] -> []
+  from-flat: [CodeSlotStart(n) | ii] -> result
+    with
+      i := <take-until(?CodeSlotStart(_)); clean-instructions> ii
+      ; result := <concat> [
+        [
+          Slot(n, Base(CodePointer(i)))
+        ]
+        , <drop-until(?CodeSlotStart(_)); from-flat> ii
+      ]
+
+  clean-instructions: i -> i'
+    where
+      i_tmp := <take-while(not(?Jump(_,_)))> i
+      ; not(<eq> ([], i_tmp))
+      ; i' := <conc> (i_tmp, [<index(|<length; inc> i_tmp)> i])
+  clean-instructions = id

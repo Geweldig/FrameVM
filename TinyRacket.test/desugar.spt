@@ -1,0 +1,76 @@
+module desugar
+
+language TinyRacket
+
+test let [[
+(let ((x 1)) (let ((y 2)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 1) (y 2)) x)
+]]
+
+test let [[
+(let ((x 1)) (let ((y 2)) y))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 1) (y 2)) y)
+]]
+
+test let [[
+(let ((x 1)) (let ((x 2)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 1)) (let ((x 2)) x))
+]]
+
+test let [[
+(let ((x 1)) (let ((y x)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 1)) (let ((y x)) x))
+]]
+
+test let [[
+(let ((x 1)) (let ((y (lambda (x) (+ x 1)))) (y 1)))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 1) (y (lambda (x) (+ x 1)))) (y 1))
+]]
+
+test let [[
+(let ((x 0))
+  (let ((done #f))
+    (let ((result
+           (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+      (if (not done) (begin (set! done #t) (x 4)) result))))
+]] transform "Syntax -> Show desugared AST" to [[
+(let ((x 0) (done #f))
+  (let ((result
+         (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+    (if (not done) (begin (set! done #t) (x 4)) result)))
+]]
+
+test letrec [[
+(letrec ((x 1)) (letrec ((y 2)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(letrec ((x 1) (y 2)) x)
+]]
+
+test letrec [[
+(letrec ((x 1)) (letrec ((x 2)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(letrec ((x 1)) (letrec ((x 2)) x))
+]]
+
+test letrec [[
+(letrec ((x 1)) (letrec ((y x)) x))
+]] transform "Syntax -> Show desugared AST" to [[
+(letrec ((x 1) (y x)) x)
+]]
+
+test letrec [[
+(letrec ((x 0))
+  (letrec ((done #f))
+    (letrec ((result
+           (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+      (if (not done) (begin (set! done #t) (x 4)) result))))
+]] transform "Syntax -> Show desugared AST" to [[
+(letrec ((x 0) (done #f) (result
+         (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3)))))
+    (if (not done) (begin (set! done #t) (x 4)) result))
+]]

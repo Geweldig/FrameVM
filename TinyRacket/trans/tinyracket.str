@@ -1,0 +1,43 @@
+module tinyracket
+
+imports
+
+  completion/completion
+  pp
+  outline
+  analysis
+  compiler/compiler
+  run-official
+  compiler/desugar-tinyracket
+
+rules // Debugging
+
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := node
+
+  debug-show-desugared:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := <desugar-all-trt> node
+
+rules //compile
+  compile-program:
+    (_, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"frd")> path
+    ; framed_ast   := <compile> ast
+    ; result	   := <pp-Framed-string> framed_ast
+
+rules //run
+  run-program = __run-program(compile-and-run)
+  run-program-debug = __run-program(compile-and-run-deb)
+
+  __run-program(strat):
+    (_, _, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"value")> path
+    ; result   := <strat> ast

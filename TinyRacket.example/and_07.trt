@@ -1,0 +1,1 @@
+(and #f (begin (writeln 42) #t))

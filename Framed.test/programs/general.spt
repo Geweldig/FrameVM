@@ -1,0 +1,36 @@
+module general
+
+language Framed
+
+test nested frame creation [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.nested_frame := frame: [
+				nested := frame: [
+					fourtytwo := 42,
+				],
+			];
+			show self.nested_frame.nested.fourtytwo;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test nested frame creation [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.value := 42;
+			self.nested_frame := frame: [
+				nested := frame: [
+					fourtytwo := self.value,
+				],
+			];
+			show self.nested_frame.nested.fourtytwo;
+		},
+	],
+]
+]] run eval-framed to "42
+"

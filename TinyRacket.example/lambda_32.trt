@@ -1,0 +1,7 @@
+(let ((fibonacci #f))
+  (set! fibonacci
+    (lambda (x)
+      (if (> 1 x)
+        0
+        (if (> 2 x) 1 (+ (fibonacci (+ x -1)) (fibonacci (+ x -2)))))))
+  (let ((fibmirror fibonacci)) (fibmirror 5)))

@@ -1,0 +1,3 @@
+(letrec ((isEven (lambda (n) (or (equal? n 0) (isOdd (+ n -1)))))
+         (isOdd (lambda (n) (and (not (equal? n 0)) (isEven (+ n -1))))))
+  (isOdd 11))

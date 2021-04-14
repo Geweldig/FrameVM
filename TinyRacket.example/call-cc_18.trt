@@ -1,0 +1,7 @@
+(with-handlers
+ (((lambda (x) #t) (lambda (kExc) kExc)))
+ (let ((k #f))
+   (let ((i 0))
+     (call-with-current-continuation (lambda (x) (set! k x)))
+     (set! i (+ i 1))
+     (if (> i 3) (begin (writeln 42) (writeln 1337) (raise i)) (k -1)))))

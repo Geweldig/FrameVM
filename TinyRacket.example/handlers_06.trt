@@ -1,0 +1,3 @@
+(let ((catchesException #f))
+  (set! catchesException (lambda (x) (+ x x)))
+  (with-handlers (((lambda (x) #t) catchesException)) (raise 21)))

@@ -1,0 +1,101 @@
+module lt
+
+language Framed
+
+test int/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := 0;
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test int/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := 1;
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test self/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := self;
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test string/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := "test";
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test int/int true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := -1;
+			self.test2 := 0;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test int/int true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := 42;
+			self.test2 := 1337;
+			self.to_show := self.test1 < self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"

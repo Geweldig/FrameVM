@@ -1,0 +1,63 @@
+module TinyRacket
+
+imports
+  Common
+
+context-free start-symbols
+  Exp
+
+context-free sorts
+  Exp
+  Bool
+  Bind
+  Op
+
+context-free syntax
+  Exp.BinOp = [([Op] [Exp] [Exp])]
+  Op.Plus = <+>
+  Op.Mul = <*>
+  Op.Gt = <\>>
+  Op.Eq = <equal?>
+  Op.And = <and>
+  Op.Or = <or>
+
+  Exp.Not = [(not [Exp])]
+  Exp.If = <
+  (if <Exp>
+  	<Exp>
+  	<Exp>)>
+  Exp.Let = <
+  (let (<{Bind " "}+>)
+  	<Exp>)>
+  Exp.LetRec = <
+  (letrec (<{Bind " "}+>)
+  	<Exp>)>
+  Exp.Raise = <(raise <Exp>)>
+  Exp.Show = <(writeln <Exp>)>
+  Exp.WithHandlers = <
+  (with-handlers
+  	(((lambda (x) #t) <Exp>))
+  	<Exp>)>
+  Exp.BoolE = [[Bool]]
+  Exp.IntE = [[INT]]
+  Exp.CallCC = <(call-with-current-continuation <Exp>)>
+  Exp.Call = <(<Exp> <Exp>)>
+  Exp.Var = [[ID]]
+  Exp.Block = <
+  (begin
+  	<Exp>)>
+  Exp.Assign = <(set! <ID> <Exp>)>
+  Exp.Lambda = <
+  (lambda (<ID>)
+  	<Exp>)>
+
+  Exp.Seq = <
+  <Exp>
+  <Exp>> {right}
+  Bool.True = <#t>
+  Bool.False = <#f>
+  Bind.Bind = <(<ID> <Exp>)>
+
+template options
+  keyword -/- [\_A-Za-z]
+  tokenize : "()[]"

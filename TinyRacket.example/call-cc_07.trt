@@ -1,0 +1,5 @@
+(let ((k #f))
+  (let ((i 0))
+    (call-with-current-continuation (lambda (x) (set! k x)))
+    (set! i (+ i 1))
+    (if (> i 3) i (k -1))))

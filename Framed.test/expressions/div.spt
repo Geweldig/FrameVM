@@ -1,0 +1,40 @@
+module div
+
+language Framed
+
+test number division [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := 84 / 2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test division negative numbers [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := -84 / -2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "42
+"
+
+test dividing self [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test := 1 + 1;
+			self.test := self.test / self.test;
+			show self.test;
+		},
+	],
+]
+]] run eval-framed to "1
+"

@@ -1,0 +1,1 @@
+(+ (with-handlers (((lambda (x) #t) (lambda (x) 1337))) 10) (raise 32))

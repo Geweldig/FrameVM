@@ -1,0 +1,6 @@
+(let ((x 0))
+  (let ((done #f))
+    (let ((result #f))
+      (set! result
+        (+ 2 (call-with-current-continuation (lambda (k) (set! x k) 3))))
+      (if (not done) (begin (set! done #t) (x 4)) result))))

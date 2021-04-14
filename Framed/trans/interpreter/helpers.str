@@ -1,0 +1,83 @@
+module helpers
+
+imports
+
+	libspoofax/stratego/debug
+  	libstratego-aterm
+    signatures/Framed-sig
+    interpreter/memory
+
+rules
+	//The error `Variable 'm' is not declared` can be ignored, as it's
+	//an implementation error in stratego.
+	deb(|m): s -> s
+		where
+			debug := <get-config> "debug"
+			; <__deb(|m)> s
+	deb(|_) = id
+	__deb(|m) = logMessage(|m, "NOTE")
+	error(|m) = logMessage(|m, "ERROR")
+
+	logMessage(|m, level): frame@Hashtable(_) ->
+		<unwrap-frame; logMessage(|m, level)> frame
+	logMessage(|m, level) = ppdebug(|<strcat> ($[{[level]} [m]], " "))
+
+	unwrap-frame: frame@Hashtable(_) -> unwrapped
+		with
+			unwrapped := <map(unwrap-frame_item)> <frame-getlist> frame
+
+	unwrap-frame_item: (name, frame@Hashtable(_)) -> (name, <unwrap-frame> frame)
+	unwrap-frame_item: res -> res
+
+	to-string: i -> string
+		where
+			<is-int> i
+			; string := <int-to-string> i
+	to-string: frame@Hashtable(_) ->
+		<unwrap-frame; strip-annos; pp-aterm; write-to-string; un-double-quote; unescape> frame
+	to-string: s -> s
+		where
+			<is-string> s
+	to-string: v -> string
+		with
+			string := <strip-annos; pp-aterm; write-to-string; un-double-quote; unescape> v
+
+	check-equals: (v1, v2) -> 1
+		where
+			<?Hashtable(_)> v1
+			; <?Hashtable(_)> v2
+			; <frame-eq> (v1, v2)
+
+	check-equals: vs@(v1, v2) -> 1
+		where
+			<is-string + is-int> v1
+			; <is-string + is-int> v2
+			; <eq> vs
+	check-equals: _ -> 0
+
+	unwrap-path: Proj([], curr) -> [curr]
+	unwrap-path: Proj(l@[_|_], curr) -> <conc> (l, [curr])
+	unwrap-path: Proj(p, curr) -> result
+		with
+			result := <conc> (<unwrap-path> p, [curr])
+
+	unwrap-path: s@Self() -> [s]
+	unwrap-path: p -> p
+
+	do-fetch(|self, _): [Self()|p] -> <fetch(|self)> p
+	do-fetch(|_, program): p -> <fetch(|program)> p
+	do-put(|self, program): ([Self()], v) -> (v, program)
+	do-put(|self, program): ([Self()|p], v) -> (self, program)
+		with
+			<put(|p, v, [self, program])> self
+
+	do-put(|self, program): ([], v) -> (self, v)
+	do-put(|self, program): (p, v) -> (self, program)
+		with
+			<put(|p, v, [self, program])> program
+
+	fetch(|result): [] -> result
+	fetch(|frame): [h|t] -> <fetch(|<frame-get(|h)> frame)> t
+
+	put(|[x], v, accessibleFrames): f -> <frame-put(|x, v, accessibleFrames)> f
+	put(|[h|t], v, accessibleFrames): f -> <put(|t, v, accessibleFrames)> <frame-get(|h)> f

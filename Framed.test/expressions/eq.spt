@@ -1,0 +1,198 @@
+module eq
+
+language Framed
+
+test string/string true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := "test";
+			self.test2 := "test";
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test string/string false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := "test1";
+			self.test2 := "test2";
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test int/int true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := 1;
+			self.test2 := 1;
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test int/int false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := 1;
+			self.test2 := 2;
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/string false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test2 := "test2";
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/frame true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test2 := frame: [];
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test frame/frame false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test1.aSlot := 1;
+			self.test2 := frame: [];
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/frame false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [
+				aSlot := 1,
+			];
+			self.test2 := frame: [];
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/frame false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test1.aSlot := 1;
+			self.test2 := frame: [];
+			self.test2.bSlot := 1;
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/frame false [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [
+				aSlot := 1,
+			];
+			self.test2 := frame: [
+				bSlot := 1,
+			];
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "0
+"
+
+test frame/frame true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [];
+			self.test1.aSlot := 1;
+			self.test2 := frame: [];
+			self.test2.aSlot := 1;
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test frame/frame true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.test1 := frame: [
+				aSlot := 1,
+			];
+			self.test2 := frame: [
+				aSlot := 1,
+			];
+			self.to_show := self.test1 == self.test2;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"
+
+test self/self true [[
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := self == self;
+			show self.to_show;
+		},
+	],
+]
+]] run eval-framed to "1
+"

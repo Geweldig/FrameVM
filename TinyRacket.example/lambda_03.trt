@@ -1,0 +1,4 @@
+(let ((twentyone 21))
+  ((lambda (ignored)
+     (let ((two 2)) ((lambda (ignored) (* two twentyone)) 1337)))
+   1337))

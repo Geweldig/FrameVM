@@ -1,0 +1,10 @@
+---
+id: org.example:Framed.example:0.1.0-SNAPSHOT
+name: Framed
+dependencies:
+  compile:
+  - org.example:Framed:0.1.0-SNAPSHOT
+debug:
+  typesmart: false
+build:
+  useBuildSystemSpec: true

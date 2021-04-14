@@ -1,0 +1,111 @@
+module ifeq
+
+language Framed
+
+test should jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			ifeq ^.value ^.branch self;
+			show "not branched";
+		},
+		branch := code {
+			show "branched";
+		},
+		value := 0,
+	],
+]
+]] run eval-framed to "branched
+"
+
+test shouldn't jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			ifeq ^.value ^.branch self;
+			show "not branched";
+		},
+		branch := code {
+			show "branched";
+		},
+		value := 1,
+	],
+]
+]] run eval-framed to "not branched
+"
+
+test should jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "before";
+			ifeq ^.value ^.branch self;
+			show "not branched";
+		},
+		branch := code {
+			show "branched";
+		},
+		value := 0,
+	],
+]
+]] run eval-framed to "before
+branched
+"
+
+test shouldn't jump [[
+frame: [
+	Main := frame: [
+		start := code {
+			show "before";
+			ifeq ^.value ^.branch self;
+			show "not branched";
+		},
+		branch := code {
+			show "branched";
+		},
+		value := 1,
+	],
+]
+]] run eval-framed to "before
+not branched
+"
+
+test multiple jumps [[
+frame: [
+	Main := frame: [
+		start := code {
+			ifeq ^.value ^.branch1 self;
+			self.notValue := !^.value;
+			ifeq self.notValue ^.branch2 self;
+		},
+		branch1 := code {
+			show "branch 1";
+		},
+		branch2 := code {
+			show "branch 2";
+		},
+		value := 1,
+	],
+]
+]] run eval-framed to "branch 2
+"
+
+test multiple jumps [[
+frame: [
+	Main := frame: [
+		start := code {
+			ifeq ^.value ^.branch1 self;
+			self.notValue := !^.value;
+			ifeq self.notValue ^.branch2 self;
+		},
+		branch1 := code {
+			show "branch 1";
+		},
+		branch2 := code {
+			show "branch 2";
+		},
+		value := 0,
+	],
+]
+]] run eval-framed to "branch 1
+"

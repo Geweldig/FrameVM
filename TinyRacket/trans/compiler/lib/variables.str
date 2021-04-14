@@ -1,0 +1,37 @@
+module variables
+
+imports
+  compiler/lib/constants
+  signatures/Framed-sig
+  statix/api
+
+signature
+  constructors
+    PathEmpty: Scope -> PathEmpty
+    PathStep: Unknown * Unknown * Scope -> PathStep
+    Scope: Unkown * Unknown -> Scope
+
+rules
+  fresh = <local-newname> "s"
+
+  get-var-name = id
+  get-var-slot: name -> path
+    with
+      a := <stx-get-ast-analysis> name
+      ; statix_path := <stx-get-ast-property(|a, "path")> name
+      ; path_length := <get-path-length> statix_path
+      ; path := <gen-frd-path> (name, path_length)
+
+  get-path-length: PathEmpty(_) -> 0
+  get-path-length: PathStep(p, _, _) -> <get-path-length; inc> p
+
+  gen-frd-path: (name, n) -> Proj(<expand-parent-path> n, <get-var-name> name)
+  expand-parent-path: 0 -> Self()
+  expand-parent-path: 1 -> Proj(Self(), PARENT)
+  expand-parent-path: n -> Proj(<dec; expand-parent-path> n, PARENT)
+
+  wrap-value: b@Int(_) -> Base(b)
+  wrap-value: b@String(_) -> Base(b)
+  wrap-value: b@Path(_) -> Base(b)
+  wrap-value: b@CodePointer(_) -> Base(b)
+  wrap-value = id

@@ -1,0 +1,8 @@
+frame: [
+	Main := frame: [
+		start := code {
+			self.to_show := 21 + 21;
+			show self.to_show;
+		},
+	],
+]

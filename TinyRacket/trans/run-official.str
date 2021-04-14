@@ -1,0 +1,12 @@
+module run-official
+
+imports
+  libspoofax/stratego/debug
+  pp
+
+strategies
+  run-official-interpreter: (_, _, ast, path, project-path) -> ("/dev/null", result)
+    with
+      filename := <guarantee-extension(|"official.value")> path
+      ; asString := <pp-TinyRacket-string> ast
+      ; result := <call> ("racket", ["-e", asString])

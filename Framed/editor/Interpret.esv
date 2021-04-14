@@ -1,0 +1,6 @@
+module Interpret
+
+menus
+  	menu: "Run" (openeditor) (source)
+    	action: "Run"   		   = run-program
+    	action: "Run (with debug)" = run-program-debug
